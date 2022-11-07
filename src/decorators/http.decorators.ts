@@ -8,9 +8,10 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import type { Type } from '@nestjs/common/interfaces';
-import { ApiBearerAuth, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { ApiSecurity, ApiUnauthorizedResponse } from '@nestjs/swagger';
 
 import type { RoleType } from '../constants';
+import { DOCS_AUTH_STRATEGY } from '../constants';
 import { AuthGuard } from '../guards/auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
 import { AuthUserInterceptor } from '../interceptors/auth-user-interceptor.service';
@@ -19,17 +20,21 @@ import { PublicRoute } from './public-route.decorator';
 export function Auth(
   roles: RoleType[] = [],
   options?: Partial<{ public: boolean }>,
-): MethodDecorator {
+): ClassDecorator {
   const isPublicRoute = options?.public;
 
   return applyDecorators(
     SetMetadata('roles', roles),
-    UseGuards(AuthGuard({ public: isPublicRoute }), RolesGuard),
-    ApiBearerAuth(),
+    UseGuards(AuthGuard, RolesGuard),
+    ApiSecurity(DOCS_AUTH_STRATEGY),
     UseInterceptors(AuthUserInterceptor),
     ApiUnauthorizedResponse({ description: 'Unauthorized' }),
     PublicRoute(isPublicRoute),
   );
+}
+
+export function Roles(roles: RoleType[] = []): MethodDecorator {
+  return applyDecorators(SetMetadata('roles', roles));
 }
 
 export function UUIDParam(

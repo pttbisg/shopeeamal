@@ -1,9 +1,11 @@
 import type { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
+import { AUTH_HEADER_KEY, DOCS_AUTH_STRATEGY } from './constants';
+
 export function setupSwagger(app: INestApplication): void {
   const documentBuilder = new DocumentBuilder()
-    .setTitle('API')
+    .setTitle('PTTB Shopee Service V1')
     .setDescription(
       `### REST
 
@@ -48,7 +50,14 @@ Routes is following REST standard (Richardson level 3)
 </p>
 </details>`,
     )
-    .addBearerAuth();
+    .addApiKey(
+      {
+        type: 'apiKey',
+        name: AUTH_HEADER_KEY,
+        in: 'header',
+      },
+      DOCS_AUTH_STRATEGY,
+    );
 
   if (process.env.API_VERSION) {
     documentBuilder.setVersion(process.env.API_VERSION);

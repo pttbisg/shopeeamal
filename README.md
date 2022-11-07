@@ -1,93 +1,89 @@
-# Awesome NestJS Boilerplate v8
+# PTTB Shopee Service V1
 
-[![Awesome NestJS](https://img.shields.io/badge/Awesome-NestJS-blue.svg?longCache=true&style=flat-square)](https://github.com/juliandavidmr/awesome-nestjs)
+Service that handle the integration between Frontend/Backend and Shopee.
 
-> This is an ever-evolving, very opinionated architecture and dev environment for new node projects using [NestJS](https://nestjs.com). Questions, feedback, and for now, even bikeshedding are welcome. 😄
+This service is based on [Awesome NestJS Boilerplate v8](README_NEST.md). Typescript is the main programming language and NestJS is the framework. This service depends on Shopee API to work. PostgreSQL is used as database. SQS is used for messaging service.
 
-## Getting started
+## Setup
 
-```bash
-# 1. Clone the repository or click on "Use this template" button.
-npx degit NarHakobyan/awesome-nest-boilerplate my-nest-app
+1. Run `yarn` to install all dependencies.
+2. Create new Postgres DB. Alternatively, use `docker-compose up` to create Postgres docker instance with the same configs. Or use existing Postgres DB.
+3. Copy `.env.example` to `.env` and fill it with the correct Postgres and SQS configs.
+4. Run `yarn migration:run` to do DB migrations.
+5. Run `yarn start:dev` to build the app and run it locally.
 
-# 2. Enter your newly-cloned folder.
-cd my-nest-app
 
-# 3. Create Environment variables file.
-cp .env.example .env
+## Docs
 
-# 3. Install dependencies. (Make sure yarn is installed: https://yarnpkg.com/lang/en/docs/install)
-yarn
+### HTTP API
+
+API Reference can be accessed at [pttb-chat.stoplight.io](https://pttb-chat.stoplight.io/) or go to `/docs/swagger.json` and import that file to Postman/Swagger/any API Docs app to see it. This API docs may be not up to date if you develop new endpoint.
+
+If you want the most up to date docs, go to [{{url}}/documentation](http://localhost:3000/documentation) after running the service.
+
+### Authentication
+
+There are 2 authentications concept for using this service. The first is authentication for other services that want to access this service API. The second one is OAuth mechanism to access Shopee API on behalf of the shop.
+
+### API Authentication
+
+`X-API-Key` header is used for API authentication. Add this header and value equal to your API Key to the HTTP API request. This single API key can be used to access all functionality on this service regardless of an actual SHopee account.
+
+Create the admin account and generate the API key via  `POST {{url}}/auth/register` to get this. You can create the first super admin account manually via DB by adding a row in `users` table.
+
+### Shopee OAuth
+
+TODO
+
+
+### Client Guide
+
+#### HTTP API
+
+To request the API, you can use any library with HTTP functionality like Axios, jQuert, or built-in fetch/Request in Javascript.
+
+This is example to send a message and receive the ack.
+```javascript
+    data = {
+        status: "ACCEPTED",
+        message,
+    };
+
+    const options = {
+        method: "POST",
+        headers: {
+            "X-API-Key": apiKey,
+        },
+        body: JSON.stringify(data),
+    };
+
+    fetch(url, options)
+        .then((response) => response.json())
+        .then((message) => {
+            console.log(message);
+  });
 ```
+## Quality Assurance
 
-## Checklist
+### Unit Test
 
-When you use this template, try follow the checklist to update your info properly
+Not available.
 
-- [ ] Change the author name in `LICENSE`
-- [ ] Change configurations in `.env`
-- [ ] Remove the `.github` folder which contains the funding info
-- [ ] Clean up the README.md file
+### E2E Test
 
-And, enjoy :)
+TODO
 
+## Deployment
 
-### Development
-```bash
-# 4. Run development server and open http://localhost:3000
-yarn start:dev
+TODO
 
-# 5. Read the documentation linked below for "Setup and development".
-```
+## Monitoring
 
-### Build
+Not available.
 
-To build the App, run
+## Best Practices
 
-```bash
-yarn build:prod
-```
-
-And you will see the generated file in `dist` that ready to be served.
-
-## Features
-
-<dl>
-  <!-- <dt><b>Quick scaffolding</b></dt>
-  <dd>Create modules, services, controller - right from the CLI!</dd> -->
-
-  <dt><b>Instant feedback</b></dt>
-  <dd>Enjoy the best DX (Developer eXperience) and code your app at the speed of thought! Your saved changes are reflected instantaneously.</dd>
-
-  <dt><b>JWT Authentication</b></dt>
-  <dd>Installed and configured JWT authentication.</dd>
-
-  <dt><b>Next generation Typescript</b></dt>
-  <dd>Always up to date typescript version.</dd>
-
-  <dt><b>Industry-standard routing</b></dt>
-  <dd>It's natural to want to add pages (e.g. /about`) to your application, and routing makes this possible.</dd>
-
-  <dt><b>Environment Configuration</b></dt>
-  <dd>development, staging and production environment configurations</dd>
-
-  <dt><b>Swagger Api Documentation</b></dt>
-  <dd>Already integrated API documentation. To see all available endpoints visit http://localhost:3000/documentation</dd>
-
-  <dt><b>Linter</b></dt>  
-  <dd>eslint + prettier = ❤️</dd>
-</dl>
-
-## Documentation
-
-This project includes a `docs` folder with more details on:
-
-1.  [Setup and development](https://narhakobyan.github.io/awesome-nest-boilerplate/docs/development.html#first-time-setup)
-1.  [Architecture](https://narhakobyan.github.io/awesome-nest-boilerplate/docs/architecture.html)
-1.  [Naming Cheatsheet](https://narhakobyan.github.io/awesome-nest-boilerplate/docs/naming-cheatsheet.html)
-
-## Community
-
-For help, discussion about best practices, or any other conversation that would benefit from being searchable:
-
-[Discuss Awesome NestJS Boilerplate on GitHub](https://github.com/NarHakobyan/awesome-nest-boilerplate/discussions)
+1. Use `yarn lint:fix` and make sure all passes.
+2. Look around the existing codebase about how to structure the code. It is better to be consistent and understood by future you/your team rather than try the "better" way that hard to understand.
+3. Run the automated test, never break it. Add more test if you add new feature. Add more test if you encounter bugs that is not covered by existing test.
+4. Try to automate everything.
