@@ -7,4 +7,9 @@ export enum UserStatus {
   INACTIVE = 'INACTIVE',
 }
 
+export enum UserEnvironment {
+  LIVE = 'LIVE',
+  TEST = 'TEST',
+}
+
 export const DEFAULT_ROLE = RoleType.USER;

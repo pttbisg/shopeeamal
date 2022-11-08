@@ -5,7 +5,6 @@ import {
   HttpCode,
   HttpStatus,
   Post,
-  Version,
 } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
@@ -19,7 +18,7 @@ import { UserRegisterDto } from './dto/UserRegisterDto';
 
 @Controller('auth')
 @ApiTags('auth')
-@Auth()
+@Auth([RoleType.ADMIN])
 export class AuthController {
   constructor(
     private userService: UserService,
@@ -38,10 +37,10 @@ export class AuthController {
     return createdUser.toDto();
   }
 
-  @Version('1')
   @Get('me')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: UserDto, description: 'current user info' })
+  @Roles([RoleType.USER])
   getCurrentUser(@AuthUser() user: UserEntity): UserDto {
     return user.toDto();
   }
