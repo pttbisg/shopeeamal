@@ -8,7 +8,11 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import type { Type } from '@nestjs/common/interfaces';
-import { ApiSecurity, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import {
+  ApiForbiddenResponse,
+  ApiSecurity,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 
 import type { RoleType } from '../constants';
 import { DOCS_AUTH_STRATEGY } from '../constants';
@@ -20,7 +24,7 @@ import { PublicRoute } from './public-route.decorator';
 export function Auth(
   roles: RoleType[] = [],
   options?: Partial<{ public: boolean }>,
-): ClassDecorator {
+): ClassDecorator & MethodDecorator {
   const isPublicRoute = options?.public;
 
   return applyDecorators(
@@ -28,12 +32,21 @@ export function Auth(
     UseGuards(AuthGuard, RolesGuard),
     ApiSecurity(DOCS_AUTH_STRATEGY),
     UseInterceptors(AuthUserInterceptor),
-    ApiUnauthorizedResponse({ description: 'Unauthorized' }),
+    ApiUnauthorizedResponse({
+      description:
+        'Unauthorized. Check the error message for the type (API/Shopee Oauth)',
+    }),
+    ApiForbiddenResponse({
+      description:
+        'Forbidden. Check the error message for the type (API/Shopee Oauth)',
+    }),
     PublicRoute(isPublicRoute),
   );
 }
 
-export function Roles(roles: RoleType[] = []): MethodDecorator {
+export function Roles(
+  roles: RoleType[] = [],
+): ClassDecorator & MethodDecorator {
   return applyDecorators(SetMetadata('roles', roles));
 }
 

@@ -20,20 +20,20 @@ module.exports = {
         message: 'Blocks:',
         initial: [
           'Controller',
-          'CreateCommand',
-          'CreateDTO',
+        //   'CreateCommand',
+        //   'CreateDTO',
           'DTO',
           'Entity',
-          'GetQuery',
+        //   'GetQuery',
           //'Module',
           'NotFoundException',
-          'PageOptionsDTO',
-          'Repository',
+        //   'PageOptionsDTO',
+        //   'Repository',
           'Service',
-          'TranslationDTO',
-          'TranslationEntity',
-          'TranslationRepository',
-          'UpdateDTO'
+        //   'UpdateDTO',
+        //   'TranslationDTO',
+        //   'TranslationEntity',
+        //   'TranslationRepository'
         ],
         choices: [
           {

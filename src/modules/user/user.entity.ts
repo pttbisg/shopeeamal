@@ -5,6 +5,7 @@ import {
   DEFAULT_ROLE,
   RoleType,
   UserEnvironment,
+  UserLocation,
   UserStatus,
 } from '../../constants';
 import { UseDto } from '../../decorators';
@@ -26,6 +27,10 @@ export class UserEntity extends AbstractEntity<UserDto> {
   @Column({ nullable: false })
   partnerId: string;
 
+  // TODO: This is temporary for migration, make it not nullable when schema is near finalize
+  @Column({ nullable: true })
+  partnerKey: string;
+
   @Column({
     type: 'enum',
     enum: UserEnvironment,
@@ -33,6 +38,14 @@ export class UserEntity extends AbstractEntity<UserDto> {
   })
   environment: UserEnvironment;
 
+  @Column({
+    type: 'enum',
+    enum: UserLocation,
+    default: UserLocation.Singapore,
+  })
+  location: UserLocation;
+
+  @Index()
   @Column({ type: 'enum', enum: UserStatus, default: UserStatus.ACTIVE })
   status: UserStatus;
 }

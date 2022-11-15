@@ -51,6 +51,14 @@ export class ApiConfigService {
     return this.getString('NODE_ENV');
   }
 
+  get shopeeOauthRedirectUrl(): string {
+    try {
+      return this.getString('SHOPEE_OAUTH_DEFAULT_REDIRECT_URL');
+    } catch {
+      return 'https://powertothebrand.com/';
+    }
+  }
+
   get fallbackLanguage(): string {
     return this.getString('FALLBACK_LANGUAGE');
   }

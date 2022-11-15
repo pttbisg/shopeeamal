@@ -19,6 +19,11 @@ export class UserRegisterDto {
   partnerId: string;
 
   @ApiPropertyOptional()
+  @IsString()
+  @Trim()
+  partnerKey: string;
+
+  @ApiPropertyOptional()
   @EnumFieldOptional(() => RoleType)
   role: RoleType;
 

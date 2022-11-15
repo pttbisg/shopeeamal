@@ -11,7 +11,7 @@ This service is based on [Awesome NestJS Boilerplate v8](README_NEST.md). Typesc
 3. Copy `.env.example` to `.env` and fill it with the correct Postgres and SQS configs.
 4. Run `yarn migration:run` to do DB migrations.
 5. Run `yarn start:dev` to build the app and run it locally.
-6. Go to [Shopee Console Management](https://open.shopee.com/myconsole/management/app), retrieve the `partner_id` and use this to register account on the this service. See [Authentication](#authentication) section.
+6. Go to [Shopee Console Management](https://open.shopee.com/myconsole/management/app), retrieve the `partner_id` and use this to register new account/account on the this service. See [Authentication](#authentication) section.
 
 
 ## Docs
@@ -24,12 +24,14 @@ If you want the most up to date docs, go to [{{url}}/documentation](http://local
 
 ### Authentication
 
-There are 2 authentications concept for using this service. The first is authentication for other services that want to access this service API. The second one is OAuth mechanism to access Shopee API on behalf of the shop. Most of OAuth mechanism will be handled by this service. Only the initial OAuth login/registration that need to be handled by client and `shop_id` need to be provided by the client.
+There are 2 authentications concept for using this service. The first is authentication for other services that want to access this service API. The second one is OAuth mechanism to access Shopee API on behalf of the shop. The rest of OAuth mechanism will be handled by this service.
+
+Only the initial OAuth login/registration that need to be triggered by client and `user_id` need to be provided by the client for each api call. `user_id` is internal PTTB `id` to identify the user so this service can translate that info for further integration with Shopee. 
 
 ![Authentication mechanism](/docs/auth.png "Authentication mechanism").
 
 
-### API Authentication
+#### API Authentication
 
 `X-API-Key` header is used for API authentication. Add this header and value equal to your API Key to the HTTP API request. This single API key can be used to access all functionality on this service regardless of an actual Shopee account.
 
@@ -37,9 +39,12 @@ Create the admin account and generate the API key via  `POST {{url}}/auth/regist
 
 Single account/API Key will correspond to single Partner/`partner_id` on the Shopee side.
 
-### Shopee OAuth
+#### Shopee OAuth
 
-TODO
+The Shopee Oauth is handled by this service. The only flow that client needed are:
+1. Call `GET /shopee/auth/get_auth_url` and provide the `user_id` to retrieve the URL that the user need to be visited/redirected.
+2. Let the end user login and authorize their Shopee account to our service. Note: For now, the client not get the notification whether it is successful or not.
+3. Call other API and provide the same `user_id`. Now you can access our user Shopee data. If you get `401` error, check the error message. If the problem is related to Shopee Oauth, do step 1 again and let the user reauthenticate. This may happens if user fails to do the OAuth or we never accessing the user acount more than 30 days. To prevent the later problem, for now, you can schedule any API call to this service for that user so it never expires.
 
 
 ### Client Guide

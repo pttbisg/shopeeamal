@@ -9,7 +9,9 @@ import { AuthService } from '../auth.service';
 export class ApiKeyStrategy extends PassportStrategy(HeaderAPIKeyStrategy) {
   private readonly logger = new Logger(ApiKeyStrategy.name);
 
-  constructor(private readonly authService: AuthService) {
+  constructor(
+    private readonly authService: AuthService, // private readonly shopeeService: ShopeeService,
+  ) {
     super({ header: AUTH_HEADER_KEY }, false, async (apiKey: string, done) => {
       try {
         const user = await this.authService.validateApiKey(apiKey);

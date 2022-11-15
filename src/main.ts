@@ -19,6 +19,7 @@ import {
 } from 'typeorm-transactional-cls-hooked';
 
 import { AppModule } from './app.module';
+import { AuthFailedFilter } from './filters/auth-failed.filter';
 import { HttpExceptionFilter } from './filters/bad-request.filter';
 import { QueryFailedFilter } from './filters/query-failed.filter';
 import { TranslationInterceptor } from './interceptors/translation-interceptor.service';
@@ -36,7 +37,7 @@ export async function bootstrap(): Promise<NestExpressApplication> {
     { cors: true },
   );
   app.enable('trust proxy'); // only if you're behind a reverse proxy (Heroku, Bluemix, AWS ELB, Nginx, etc)
-  app.use(helmet());
+
   // app.setGlobalPrefix('/api'); use api as global prefix if you don't have subdomain
   app.use(
     rateLimit({
@@ -53,6 +54,7 @@ export async function bootstrap(): Promise<NestExpressApplication> {
   app.useGlobalFilters(
     new HttpExceptionFilter(reflector),
     new QueryFailedFilter(reflector),
+    new AuthFailedFilter(reflector),
   );
 
   app.useGlobalInterceptors(
@@ -73,6 +75,10 @@ export async function bootstrap(): Promise<NestExpressApplication> {
   );
 
   const configService = app.select(SharedModule).get(ApiConfigService);
+
+  if (configService.isProduction) {
+    app.use(helmet());
+  }
 
   // only start nats if it is enabled
   if (configService.natsEnabled) {

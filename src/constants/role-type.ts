@@ -13,3 +13,5 @@ export enum UserEnvironment {
 }
 
 export const DEFAULT_ROLE = RoleType.USER;
+
+export { Country as UserLocation } from './country';
