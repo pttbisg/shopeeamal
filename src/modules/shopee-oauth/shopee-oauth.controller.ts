@@ -9,9 +9,15 @@ import {
   Req,
   Res,
 } from '@nestjs/common';
-import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiAcceptedResponse,
+  ApiDefaultResponse,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
 import { QueryOptionsDto } from '../../common/dto/query-options.dto';
+import { StandardErrorDto } from '../../common/dto/standard-error.dto';
 import { RoleType } from '../../constants';
 import { Auth, AuthUser, PublicRoute } from '../../decorators';
 import { UserEntity } from '../../modules/user/user.entity';
@@ -24,13 +30,16 @@ import {
   OauthCallbackPayloadDto,
 } from './dtos/oauth-callback.dto';
 import { OauthUrlOptionsDto } from './dtos/oauth-url-options.dto';
-import { ShopeeOauthDto } from './dtos/shopee-oauth.dto';
+import { ShopeeOauthResponseDto } from './dtos/shopee-oauth-response.dto';
 import { UrlDto } from './dtos/url.dto';
 import { ShopeeOauthService } from './shopee-oauth.service';
 
 @Controller('shopee/auth')
 @ApiTags('shopee-oauth', 'shopee')
 @Auth([RoleType.USER, RoleType.ADMIN])
+@ApiDefaultResponse({
+  type: StandardErrorDto,
+})
 export class ShopeeOauthController {
   constructor(private service: ShopeeOauthService) {}
 
@@ -63,8 +72,12 @@ export class ShopeeOauthController {
     res.status(HttpStatus.OK).json(response);
   }
 
-  @Post('token/get')
+  @Post(['token/get', 'get_access_token'])
   @HttpCode(HttpStatus.ACCEPTED)
+  @ApiAcceptedResponse({
+    type: ShopeeOauthResponseDto,
+    description: 'Get Access/Refresh Token',
+  })
   getAccessToken(
     @AuthUser() user: UserEntity,
     @Query() query: QueryOptionsDto,
@@ -87,20 +100,23 @@ export class ShopeeOauthController {
     );
   }
 
-  @Post('access_token/get')
+  @Post(['access_token/get', 'refresh_access_token'])
   @HttpCode(HttpStatus.ACCEPTED)
-  refreshAccessToken(@Body() createShopeeOauthDto: ShopeeOauthDto) {
-    // const entity = await this.shopeeOauthService.refreshAcessToken(
-    //   createShopeeOauthDto,
-    // );
-    // return entity.toDto();
-    return createShopeeOauthDto;
+  @ApiAcceptedResponse({
+    type: ShopeeOauthResponseDto,
+    description: 'Refresh Access Token',
+  })
+  refreshAccessToken(
+    @AuthUser() user: UserEntity,
+    @Query() query: QueryOptionsDto,
+  ) {
+    return this.service.refreshAccessToken(user.partnerId, query);
   }
 
   @Post('callback')
   @HttpCode(HttpStatus.ACCEPTED)
   @PublicRoute(true)
-  @ApiOkResponse({
+  @ApiAcceptedResponse({
     type: UrlDto,
     description: 'Callback after successful Oauth',
   })

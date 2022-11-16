@@ -6,8 +6,9 @@ import {
   HttpStatus,
   Post,
 } from '@nestjs/common';
-import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiDefaultResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
+import { StandardErrorDto } from '../../common/dto/standard-error.dto';
 import { RoleType } from '../../constants';
 import { Auth, AuthUser, Roles } from '../../decorators';
 import { UserDto } from '../user/dtos/user.dto';
@@ -19,6 +20,9 @@ import { UserRegisterDto } from './dto/UserRegisterDto';
 @Controller('auth')
 @ApiTags('auth')
 @Auth([RoleType.ADMIN])
+@ApiDefaultResponse({
+  type: StandardErrorDto,
+})
 export class AuthController {
   constructor(
     private userService: UserService,

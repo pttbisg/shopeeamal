@@ -37,7 +37,7 @@ All this authentication mechanism is based on the assumption that **1 User = 1 S
 
 `X-API-Key` header is used for API authentication. Add this header and value equal to your API Key to the HTTP API request. This single API key can be used to access all functionality on this service regardless of an actual Shopee account.
 
-Create the admin account and generate the API key via  `POST {{url}}/auth/register` to get this. You can create the first super admin account manually via DB by adding a row in `users` table.
+Create the admin account and generate the API key via  `POST {{url}}/auth/register` to get this. You can create the first super admin account manually via DB by adding a row in `users` table. User environment will affect the Shopee API that will be used (Live, Sandbox, or Test/Mock server that was set in .env)
 
 Single account/API Key will correspond to single Partner/`partner_id` on the Shopee side.
 

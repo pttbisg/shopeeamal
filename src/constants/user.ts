@@ -9,6 +9,7 @@ export enum UserStatus {
 
 export enum UserEnvironment {
   LIVE = 'LIVE',
+  SANDBOX = 'SANDBOX',
   TEST = 'TEST',
 }
 

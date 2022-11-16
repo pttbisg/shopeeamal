@@ -6,9 +6,10 @@ import {
   Query,
   ValidationPipe,
 } from '@nestjs/common';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiDefaultResponse, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { PageDto } from '../../common/dto/page.dto';
+import { StandardErrorDto } from '../../common/dto/standard-error.dto';
 import { RoleType } from '../../constants';
 import { ApiPageOkResponse, Auth, UUIDParam } from '../../decorators';
 import { TranslationService } from '../../shared/services/translation.service';
@@ -19,6 +20,9 @@ import { UserService } from './user.service';
 @Controller('users')
 @ApiTags('users')
 @Auth([RoleType.ADMIN])
+@ApiDefaultResponse({
+  type: StandardErrorDto,
+})
 export class UserController {
   constructor(
     private userService: UserService,

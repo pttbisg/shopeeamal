@@ -59,6 +59,14 @@ export class ApiConfigService {
     }
   }
 
+  get shopeeApiMockUrl(): string {
+    try {
+      return this.getString('SHOPEE_API_DEFAULT_MOCK_URL');
+    } catch {
+      return 'https://localhost:3002/';
+    }
+  }
+
   get fallbackLanguage(): string {
     return this.getString('FALLBACK_LANGUAGE');
   }

@@ -1,7 +1,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { QueryOptionsDto } from 'common/dto/query-options.dto';
-import { Repository } from 'typeorm';
+import { IsNull, Not, Repository } from 'typeorm';
 import { Transactional } from 'typeorm-transactional-cls-hooked';
 
 import { ShopeeOauthStatus } from '../../constants';
@@ -20,10 +20,6 @@ import { ShopeeOauthEntity } from './shopee-oauth.entity';
 @Injectable()
 export class ShopeeOauthService {
   private readonly logger = new Logger(ShopeeOauthService.name);
-
-  refreshAcessToken(_createShopeeOauthDto: ShopeeOauthDto) {
-    throw new Error('Method not implemented.');
-  }
 
   constructor(
     @InjectRepository(ShopeeOauthEntity)
@@ -89,6 +85,21 @@ export class ShopeeOauthService {
     });
   }
 
+  async getAuthorizedOauth(partnerId: string, userId: string, shopId?: string) {
+    const params = {
+      partnerId,
+      userId,
+      shopId,
+      refreshToken: Not(IsNull()),
+      //   status: In([ShopeeOauthStatus.ACTIVE, ShopeeOauthStatus.INACTIVE]), // Ignore the expired
+    };
+
+    return this.shopeeOauthRepository.findOne({
+      where: params,
+      order: { createdAt: 'DESC' },
+    });
+  }
+
   async getAccessToken(
     partnerId: string,
     query: QueryOptionsDto,
@@ -124,7 +135,7 @@ export class ShopeeOauthService {
     await this.shopeeOauthRepository.save(oauth);
 
     const response = await this.shopeeService.apiPost(
-      shouldResend ? 'get_token_by_resend_code' : 'access_token/get',
+      shouldResend ? 'get_token_by_resend_code' : 'auth/token/get',
       payload,
       {
         partner_id: partnerId,
@@ -132,6 +143,59 @@ export class ShopeeOauthService {
       },
     );
 
+    const updatedOauth = this.buildRefreshedOauthFromResponse(oauth, response);
+
+    await this.shopeeOauthRepository.save(updatedOauth);
+
+    return response;
+  }
+
+  getAccessTokenByResendCode(
+    partnerId: string,
+    query: QueryOptionsDto,
+    payload: GetAccessTokenByResendCodePayloadDto,
+  ) {
+    return this.getAccessToken(partnerId, query, {
+      code: payload.resend_code,
+      ...payload,
+    });
+  }
+
+  async refreshAccessToken(partnerId: string, query: QueryOptionsDto) {
+    const oauth = await this.getAuthorizedOauth(
+      partnerId,
+      query.user_id,
+      query.shop_id,
+    );
+
+    if (!oauth) {
+      throw new NotFoundException(
+        'Oauth is not authorized. Request the access/refresh token first',
+      );
+    }
+
+    const payload = {
+      refresh_token: oauth.refreshToken,
+      partner_id: oauth.partnerId,
+      shop_id: oauth.shopId,
+    };
+
+    const response = await this.shopeeService.apiPost(
+      'auth/access_token/get',
+      payload,
+      {
+        partner_id: partnerId,
+        ...query,
+      },
+    );
+
+    const updatedOauth = this.buildRefreshedOauthFromResponse(oauth, response);
+    await this.shopeeOauthRepository.save(updatedOauth);
+
+    return response;
+  }
+
+  buildRefreshedOauthFromResponse(oauth: ShopeeOauthEntity, response) {
     const refreshTokenDuration = 30 * 24 * 60 * 60 * 60; // 30 days
     const timestamp = Date.now();
 
@@ -147,20 +211,7 @@ export class ShopeeOauthService {
     oauth.merchantIds ??= response.merchant_id_list;
     oauth.shopIds ??= response.shop_id_list;
 
-    await this.shopeeOauthRepository.save(oauth);
-
-    return response;
-  }
-
-  getAccessTokenByResendCode(
-    partnerId: string,
-    query: QueryOptionsDto,
-    payload: GetAccessTokenByResendCodePayloadDto,
-  ) {
-    return this.getAccessToken(partnerId, query, {
-      code: payload.resend_code,
-      ...payload,
-    });
+    return oauth;
   }
 
   @Transactional()

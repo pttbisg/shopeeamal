@@ -78,12 +78,17 @@ export class ShopeeService {
   private setConfig(env: string, location?: string) {
     if (env === UserEnvironment.LIVE && location === UserLocation.China) {
       this.host = 'https://openplatform.shopee.cn';
-    } else if (location === UserLocation.China) {
+    } else if (
+      env === UserEnvironment.SANDBOX &&
+      location === UserLocation.China
+    ) {
       this.host = 'https://openplatform.test-stable.shopee.cn/';
     } else if (env === UserEnvironment.LIVE) {
       this.host = 'https://partner.shopeemobile.com/';
-    } else {
+    } else if (env === UserEnvironment.SANDBOX) {
       this.host = 'https://partner.test-stable.shopeemobile.com/';
+    } else {
+      this.host = this.configService.shopeeApiMockUrl;
     }
   }
 
