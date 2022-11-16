@@ -26,9 +26,11 @@ If you want the most up to date docs, go to [{{url}}/documentation](http://local
 
 There are 2 authentications concept for using this service. The first is authentication for other services that want to access this service API. The second one is OAuth mechanism to access Shopee API on behalf of the shop. The rest of OAuth mechanism will be handled by this service.
 
-Only the initial OAuth login/registration that need to be triggered by client and `user_id` need to be provided by the client for each api call. `user_id` is internal PTTB `id` to identify the user so this service can translate that info for further integration with Shopee. 
+Only the initial OAuth login/registration that need to be triggered by client and `user_id` need to be provided by the client for each api call. `user_id` is `id` to identify the user so this service can translate that info for further integration with Shopee. This `id` can be our internal id or the same as Shopee `shop_id` that can be retrieved from their [Shop URL](https://seller.shopee.ph/edu/article/6524). Using `shop_id` is better for technical purposes but it is better UX for end user if they don't need to provide us with this technical information. For this, all API calls also have *optional* `shop_id` parameter to help identify the user more.
 
 ![Authentication mechanism](/docs/auth.png "Authentication mechanism").
+
+All this authentication mechanism is based on the assumption that **1 User = 1 Shopee Shop**. Shopee have a feature called Subaccount that allow 1 User to have 1 Main Account and multiple Members Account including multiple Shop. This feature is not fully supported by this service for now. 
 
 
 #### API Authentication
@@ -42,7 +44,7 @@ Single account/API Key will correspond to single Partner/`partner_id` on the Sho
 #### Shopee OAuth
 
 The Shopee Oauth is handled by this service. The only flow that client needed are:
-1. Call `GET /shopee/auth/get_auth_url` and provide the `user_id` to retrieve the URL that the user need to be visited/redirected.
+1. Call `GET /shopee/auth/get_auth_url` and provide the `user_id` or optional `shop_id` to retrieve the URL that the user need to be visited/redirected.
 2. Let the end user login and authorize their Shopee account to our service. Note: For now, the client not get the notification whether it is successful or not.
 3. Call other API and provide the same `user_id`. Now you can access our user Shopee data. If you get `401` error, check the error message. If the problem is related to Shopee Oauth, do step 1 again and let the user reauthenticate. This may happens if user fails to do the OAuth or we never accessing the user acount more than 30 days. To prevent the later problem, for now, you can schedule any API call to this service for that user so it never expires.
 

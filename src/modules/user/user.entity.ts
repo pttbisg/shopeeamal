@@ -27,8 +27,7 @@ export class UserEntity extends AbstractEntity<UserDto> {
   @Column({ nullable: false })
   partnerId: string;
 
-  // TODO: This is temporary for migration, make it not nullable when schema is near finalize
-  @Column({ nullable: true })
+  @Column({ nullable: false })
   partnerKey: string;
 
   @Column({

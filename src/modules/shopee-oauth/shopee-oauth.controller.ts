@@ -6,13 +6,23 @@ import {
   HttpStatus,
   Post,
   Query,
+  Req,
   Res,
 } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
+import { QueryOptionsDto } from '../../common/dto/query-options.dto';
 import { RoleType } from '../../constants';
-import { Auth, AuthUser } from '../../decorators';
+import { Auth, AuthUser, PublicRoute } from '../../decorators';
 import { UserEntity } from '../../modules/user/user.entity';
+import {
+  GetAccessTokenByResendCodePayloadDto,
+  GetAccessTokenPayloadDto,
+} from './dtos/get-access-token-payload.dto';
+import {
+  OauthCallbackOptionsDto,
+  OauthCallbackPayloadDto,
+} from './dtos/oauth-callback.dto';
 import { OauthUrlOptionsDto } from './dtos/oauth-url-options.dto';
 import { ShopeeOauthDto } from './dtos/shopee-oauth.dto';
 import { UrlDto } from './dtos/url.dto';
@@ -24,43 +34,90 @@ import { ShopeeOauthService } from './shopee-oauth.service';
 export class ShopeeOauthController {
   constructor(private service: ShopeeOauthService) {}
 
-  @Get('/auth/get_oauth_url')
+  @Get('get_oauth_url')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     type: UrlDto,
     description: 'Get Shopee Oauth Login URL',
   })
-  initOauth(
+  async initOauth(
     @AuthUser() user: UserEntity,
-    @Query() getOauthUrlOption: OauthUrlOptionsDto,
+    @Query() options: OauthUrlOptionsDto,
+    @Req() req,
     @Res() res,
-  ): UrlDto {
-    const url = this.service.getOauthUrl(getOauthUrlOption, user);
+  ) {
+    const url = this.service.getOauthUrl(
+      user,
+      `${req.protocol}://${req.get('host')}`,
+      options,
+    );
 
-    if (getOauthUrlOption.should_redirect) {
-      return res.redirect(url);
+    const status = await this.service.initializeOauth(user, options);
+
+    if (options.should_redirect) {
+      res.redirect(url);
     }
 
-    return res.json(200, { url });
+    const response = { url, oauth_status: status };
+
+    res.status(HttpStatus.OK).json(response);
   }
 
-  @Post('/auth/token/get')
-  @HttpCode(HttpStatus.CREATED)
-  getAccessToken(@Body() createShopeeOauthDto: ShopeeOauthDto) {
-    // const entity = await this.shopeeOauthService.getAccessToken(
-    //   createShopeeOauthDto,
-    // );
-    // return entity.toDto();
-    return createShopeeOauthDto;
+  @Post('token/get')
+  @HttpCode(HttpStatus.ACCEPTED)
+  getAccessToken(
+    @AuthUser() user: UserEntity,
+    @Query() query: QueryOptionsDto,
+    @Body() payload: GetAccessTokenPayloadDto,
+  ) {
+    return this.service.getAccessToken(user.partnerId, query, payload);
   }
 
-  @Post('/auth/access_token/get')
-  @HttpCode(HttpStatus.CREATED)
+  @Post('get_token_by_resend_code')
+  @HttpCode(HttpStatus.ACCEPTED)
+  getAccessTokenByResendCode(
+    @AuthUser() user: UserEntity,
+    @Query() query: QueryOptionsDto,
+    @Body() payload: GetAccessTokenByResendCodePayloadDto,
+  ) {
+    return this.service.getAccessTokenByResendCode(
+      user.partnerId,
+      query,
+      payload,
+    );
+  }
+
+  @Post('access_token/get')
+  @HttpCode(HttpStatus.ACCEPTED)
   refreshAccessToken(@Body() createShopeeOauthDto: ShopeeOauthDto) {
     // const entity = await this.shopeeOauthService.refreshAcessToken(
     //   createShopeeOauthDto,
     // );
     // return entity.toDto();
     return createShopeeOauthDto;
+  }
+
+  @Post('callback')
+  @HttpCode(HttpStatus.ACCEPTED)
+  @PublicRoute(true)
+  @ApiOkResponse({
+    type: UrlDto,
+    description: 'Callback after successful Oauth',
+  })
+  async webhookCallback(
+    @Query() query: OauthCallbackOptionsDto,
+    @Body() payload: OauthCallbackPayloadDto,
+    @Res() res,
+  ): Promise<UrlDto> {
+    await this.service.getAccessToken(
+      query.partner_id,
+      {
+        user_id: query.user_id,
+        shop_id: query.shop_id,
+      },
+      payload,
+    );
+
+    return res.redirect(query.redirect_url);
   }
 }
