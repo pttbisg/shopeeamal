@@ -30,7 +30,7 @@ export class ShopeeOauthService {
 
   getOauthUrl(user: UserEntity, baseUrl: string, options: OauthUrlOptionsDto) {
     const callbackUrl = new URL('/shopee/auth/callback', baseUrl);
-    callbackUrl.searchParams.set('partner_id', user.partnerId);
+    callbackUrl.searchParams.set('partner_id', `${user.partnerId}`);
     options.callback_url ??= this.apiConfigService.shopeeOauthRedirectUrl;
 
     for (const [key, value] of Object.entries(options)) {
@@ -68,9 +68,9 @@ export class ShopeeOauthService {
   }
 
   async getInitializedOauth(
-    partnerId: string,
+    partnerId: number,
     userId: string,
-    shopId?: string,
+    shopId?: number,
   ) {
     const params = {
       partnerId,
@@ -85,7 +85,7 @@ export class ShopeeOauthService {
     });
   }
 
-  async getAuthorizedOauth(partnerId: string, userId: string, shopId?: string) {
+  async getAuthorizedOauth(partnerId: number, userId: string, shopId?: number) {
     const params = {
       partnerId,
       userId,
@@ -108,7 +108,7 @@ export class ShopeeOauthService {
   ) {
     this.shopeeService.user = user;
     const partnerId = user.partnerId;
-    const shopId = query.shop_id || payload.shop_id?.toString();
+    const shopId = query.shop_id || payload.shop_id;
     const oauth = await this.getInitializedOauth(
       partnerId,
       query.user_id,
@@ -132,14 +132,13 @@ export class ShopeeOauthService {
 
     oauth.status = ShopeeOauthStatus.AUTHORIZED;
     oauth.shopId = shopId ?? oauth.shopId;
-    oauth.mainAccountId =
-      payload.main_account_id?.toString() ?? oauth.mainAccountId;
+    oauth.mainAccountId = payload.main_account_id ?? oauth.mainAccountId;
     await this.shopeeOauthRepository.save(oauth);
 
     const shopeePayload = {
-      partner_id: Number(partnerId),
+      partner_id: partnerId,
       ...payload,
-      shop_id: Number(shopId),
+      shop_id: shopId,
     };
     this.shopeeService.oauth = oauth;
     const response = await this.shopeeService.apiPost(
@@ -188,8 +187,8 @@ export class ShopeeOauthService {
   async refreshToken(oauth: ShopeeOauthEntity) {
     const payload = {
       refresh_token: oauth.refreshToken,
-      partner_id: Number(oauth.partnerId),
-      shop_id: Number(oauth.shopId),
+      partner_id: oauth.partnerId,
+      shop_id: oauth.shopId,
     };
 
     this.shopeeService.oauth = oauth;

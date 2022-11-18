@@ -1,4 +1,4 @@
-import { StringField, StringFieldOptional } from '../../decorators';
+import { PositiveIntegerFieldOptional, StringField } from '../../decorators';
 
 export class QueryOptionsDto {
   @StringField({
@@ -7,9 +7,9 @@ export class QueryOptionsDto {
   })
   readonly user_id: string;
 
-  @StringFieldOptional({
+  @PositiveIntegerFieldOptional({
     description:
       'The shop_id to represent the id from Shopee side. Optional but recommended to identify the shop/user',
   })
-  readonly shop_id?: string;
+  readonly shop_id?: number;
 }

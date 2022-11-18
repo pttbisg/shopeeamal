@@ -38,7 +38,7 @@ export class ShopeeOauthGuard implements CanActivate {
     const oauth = await this.shopeeOauthService.getAuthorizedOauth(
       partnerId,
       userId,
-      request.query?.shop_id as string,
+      request.query?.shop_id as number,
     );
 
     if (!oauth) {

@@ -10,27 +10,27 @@ import { ShopeeOauthDto } from './dtos/shopee-oauth.dto';
 @UseDto(ShopeeOauthDto)
 export class ShopeeOauthEntity extends AbstractEntity<ShopeeOauthDto> {
   @Index()
-  @Column({ nullable: false })
-  partnerId: string;
+  @Column({ type: 'integer', nullable: false })
+  partnerId: number;
 
   @Index()
   @Column({ nullable: false })
   userId: string;
 
-  @Column({ nullable: true })
-  shopId: string;
+  @Column({ type: 'integer', nullable: true })
+  shopId: number;
 
   // Future schema to handle Subaccount features on Shopee
   // That allow 1 main account to have multiple Shops and member accounts
-  @Column({ nullable: true })
-  mainAccountId: string;
+  @Column({ type: 'integer', nullable: true })
+  mainAccountId: number;
 
   // shopIds will always be filled with single shopId for now
-  @Column({ type: 'text', array: true, nullable: true })
-  shopIds: string[];
+  @Column({ type: 'integer', array: true, nullable: true })
+  shopIds: number[];
 
-  @Column({ type: 'text', array: true, nullable: true })
-  merchantIds: string[];
+  @Column({ type: 'integer', array: true, nullable: true })
+  merchantIds: number[];
 
   @Column({ nullable: true })
   accessToken: string;

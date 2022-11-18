@@ -16,7 +16,7 @@ export class UserDto extends AbstractDto {
   apiKey: string;
 
   @ApiProperty()
-  partnerId: string;
+  partnerId: number;
 
   @ApiPropertyOptional()
   partnerKey: string;

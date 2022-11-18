@@ -24,8 +24,8 @@ export class UserEntity extends AbstractEntity<UserDto> {
   @Column({ type: 'enum', enum: RoleType, default: DEFAULT_ROLE })
   role: RoleType;
 
-  @Column({ nullable: false })
-  partnerId: string;
+  @Column({ type: 'integer', nullable: false })
+  partnerId: number;
 
   @Column({ nullable: false })
   partnerKey: string;

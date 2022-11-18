@@ -2,7 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
 
 import { RoleType, UserEnvironment, UserStatus } from '../../../constants';
-import { EnumFieldOptional } from '../../../decorators';
+import { EnumFieldOptional, PositiveIntegerField } from '../../../decorators';
 import { Trim } from '../../../decorators/transform.decorators';
 
 export class UserRegisterDto {
@@ -12,11 +12,9 @@ export class UserRegisterDto {
   @Trim()
   readonly clientName: string;
 
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
+  @PositiveIntegerField()
   @Trim()
-  partnerId: string;
+  partnerId: number;
 
   @ApiPropertyOptional()
   @IsString()

@@ -98,10 +98,10 @@ export class ShopeeService {
     const query = {
       timestamp,
       sign: this.getSignature(basePath, timestamp),
-      partner_id: Number(this.user.partnerId),
+      partner_id: this.user.partnerId,
       ...(this.isOauthResource(basePath) &&
         this.oauthConfig && {
-          shop_id: Number(this.oauth.shopId),
+          shop_id: this.oauth.shopId,
           access_token: this.oauth.accessToken,
         }),
       ...baseQuery,
