@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 import { ShopeeResponseDto } from '../../../common/dto/shopee-response.dto';
 import { BooleanField, StringFieldOptional } from '../../../decorators';
-import type { OrderResponse } from './order.dto';
+import type { OrderFullResponse } from './order-response.dto';
 
 class OrderListResponse {
   @BooleanField()
@@ -12,10 +12,13 @@ class OrderListResponse {
   next_cursor: string;
 
   @ApiProperty()
-  order_list: OrderResponse[];
+  order_list: OrderFullResponse[];
 }
 
 export class OrderListResponseDto extends ShopeeResponseDto {
   @ApiProperty()
   response: OrderListResponse;
+
+  @StringFieldOptional()
+  next_cursor: string;
 }

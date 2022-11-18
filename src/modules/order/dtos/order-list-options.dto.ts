@@ -11,7 +11,7 @@ enum OrderTimeRange {
   update_time = 'update_time',
 }
 
-enum OrderOptionalField {
+enum OrderListOptionalField {
   order_status = 'order_status',
 }
 
@@ -27,24 +27,29 @@ enum OrderStatus {
 }
 
 export class OrderListOptionsDto extends QueryOptionsDto {
-  @EnumField(() => OrderTimeRange)
+  @EnumField(() => OrderTimeRange, { example: OrderTimeRange.create_time })
   time_range_field: OrderTimeRange;
 
-  @PositiveIntegerField()
+  @PositiveIntegerField({
+    example: Math.floor(Date.now() / 1000) - 14 * 24 * 60 * 60, // 14 days ago
+  })
   time_from: number;
 
-  @PositiveIntegerField()
+  @PositiveIntegerField({ example: Math.floor(Date.now() / 1000) })
   time_to: number;
 
-  @PositiveIntegerField()
+  @PositiveIntegerField({ example: 10 })
   page_size: number;
 
   @StringFieldOptional()
   cursor: string;
 
-  @EnumFieldOptional(() => OrderStatus)
+  @EnumFieldOptional(() => OrderStatus, { example: OrderStatus.READY_TO_SHIP })
   status: OrderStatus;
 
-  @EnumFieldOptional(() => OrderOptionalField)
-  response_optional_fields: OrderOptionalField;
+  @StringFieldOptional({
+    isArray: true,
+    example: Object.values(OrderListOptionalField).join(','),
+  })
+  response_optional_fields: string[];
 }

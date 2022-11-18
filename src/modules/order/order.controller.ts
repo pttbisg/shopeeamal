@@ -1,11 +1,10 @@
 import { Controller, Get, HttpCode, HttpStatus, Query } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import type { PageDto } from 'common/dto/page.dto';
 
 import { RoleType } from '../../constants';
 import { Auth } from '../../decorators/http.decorators';
-import type { OrderDto } from './dtos/order.dto';
 import { OrderDetailOptionsDto } from './dtos/order-detail-options.dto';
+import { OrderDetailResponseDto } from './dtos/order-detail-response.dto';
 import { OrderListOptionsDto } from './dtos/order-list-options.dto';
 import { OrderListResponseDto } from './dtos/order-list-response.dto';
 import { OrderService } from './order.service';
@@ -20,7 +19,7 @@ export class OrderController {
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     type: OrderListResponseDto,
-    description: 'Ge List of Shopee Order',
+    description: 'Get List of Shopee Order',
   })
   getOrderList(
     @Query() options: OrderListOptionsDto,
@@ -30,9 +29,13 @@ export class OrderController {
 
   @Get('get_order_detail')
   @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    type: OrderDetailResponseDto,
+    description: 'Get Detail of Shopee Order',
+  })
   getOrderDetail(
     @Query() options: OrderDetailOptionsDto,
-  ): Promise<PageDto<OrderDto>> {
+  ): Promise<OrderDetailResponseDto> {
     return this.orderService.getOrderDetail(options);
   }
 }

@@ -68,7 +68,7 @@ export function NumberField(
 
   if (swagger !== false) {
     decorators.push(
-      ApiProperty({ type: Number, ...options, example: int ? 1 : 1.2 }),
+      ApiProperty({ type: Number, example: int ? 12_345 : 123.45, ...options }),
     );
   }
 
@@ -124,7 +124,7 @@ export function PositiveIntegerFieldOptional(
 ): PropertyDecorator {
   return applyDecorators(
     IsOptional(),
-    NumberField({ int: true, isPositive: true, ...options }),
+    NumberField({ int: true, isPositive: true, required: false, ...options }),
   );
 }
 
@@ -134,7 +134,15 @@ export function StringField(
   const decorators = [IsNotEmpty(), IsString(), Trim()];
 
   if (options.swagger !== false) {
-    decorators.push(ApiProperty({ type: String, ...options }));
+    decorators.push(
+      ApiProperty({
+        type: String,
+        description: options.isArray
+          ? 'On Query Params, format/serialized as single string with comma separated. Eg: string1,string2'
+          : undefined,
+        ...options,
+      }),
+    );
   }
 
   if (options.minLength) {
@@ -264,7 +272,7 @@ export function TmpKeyFieldOptional(
 
 export function EnumField<TEnum>(
   getEnum: () => TEnum,
-  options: Omit<ApiPropertyOptions, 'type' | 'enum' | 'enumName'> &
+  options: Omit<ApiPropertyOptions, 'isArray' | 'type' | 'enum' | 'enumName'> &
     Partial<{
       each: boolean;
       swagger: boolean;
@@ -275,7 +283,14 @@ export function EnumField<TEnum>(
   const decorators = [IsEnum(enumValue as object, { each: options.each })];
 
   if (options.swagger !== false) {
-    decorators.push(ApiEnumProperty(getEnum, options));
+    decorators.push(
+      ApiEnumProperty(getEnum, {
+        description: options.each
+          ? 'On Query Params, format/serialized as single string with comma separated. Eg: enum1,enum2'
+          : undefined,
+        ...options,
+      }),
+    );
   }
 
   if (options.each) {

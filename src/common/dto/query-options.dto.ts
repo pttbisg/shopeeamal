@@ -10,6 +10,7 @@ export class QueryOptionsDto {
   @PositiveIntegerFieldOptional({
     description:
       'The shop_id to represent the id from Shopee side. Optional but recommended to identify the shop/user',
+    example: null, //force blank
   })
   readonly shop_id?: number;
 }

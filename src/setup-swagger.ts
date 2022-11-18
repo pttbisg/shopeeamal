@@ -7,48 +7,20 @@ export function setupSwagger(app: INestApplication): void {
   const documentBuilder = new DocumentBuilder()
     .setTitle('PTTB Shopee Service V1')
     .setDescription(
-      `### REST
+      `## Shopee API
+        All endpoints under \`/shopee/\` will point to Shopee API with similar request/response format.
+         See (Shopee API Reference)[https://open.shopee.com/documents/v2/v2.product.get_category?module=89&type=1] for more details.
+         The difference is client doesn't need to handle \`partner_id, access_token, shop_id, sign, and timestamp\`.
+         Only \`user_id\` that parameter need to be provided.
 
-Routes is following REST standard (Richardson level 3)
+      ## Authentication
+      1. All API endpoint is behind \`X-API-KEY\` authentication in headers.
+      2. Go to \`/shopee/auth/get_auth_url\` and let the user authorize their Shopee account.
+      3. Go to any endpoints in this API with that same \`user_id\`. The Shopee Auth will be handled.
 
-<details><summary>Detailed specification</summary>
-<p>
+      ### REST
 
-**List:**
-  - \`GET /<resources>/\`
-    - Get the list of **<resources>** as admin
-  - \`GET /user/<user_id>/<resources>/\`
-    - Get the list of **<resources>** for a given **<user_id>**
-    - Output a **403** if logged user is not **<user_id>**
-
-**Detail:**
-  - \`GET /<resources>/<resource_id>\`
-    - Get the detail for **<resources>** of id **<resource_id>**
-    - Output a **404** if not found
-  - \`GET /user/<user_id>/<resources>/<resource_id>\`
-    - Get the list of **<resources>** for a given **user_id**
-    - Output a **404** if not found
-    - Output a **403** if:
-      - Logged user is not **<user_id>**
-      - The **<user_id>** have no access to **<resource_id>**
-
-**Creation / Edition / Replacement / Suppression:**
-  - \`<METHOD>\` is:
-    - **POST** for creation
-    - **PATCH** for update (one or more fields)
-    - **PUT** for replacement (all fields, not used)
-    - **DELETE** for suppression (all fields, not used)
-  - \`<METHOD> /<resources>/<resource_id>\`
-    - Create **<resources>** with id **<resource_id>** as admin
-    - Output a **400** if **<resource_id>** conflicts with existing **<resources>**
-  - \`<METHOD> /user/<user_id>/<resources>/<resource_id>\`
-    - Create **<resources>** with id **<resource_id>** as a given **user_id**
-    - Output a **409** if **<resource_id>** conflicts with existing **<resources>**
-    - Output a **403** if:
-      - Logged user is not **<user_id>**
-      - The **<user_id>** have no access to **<resource_id>**
-</p>
-</details>`,
+    Routes is following Shopee Style API`,
     )
     .addApiKey(
       {
