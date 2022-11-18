@@ -4,13 +4,15 @@ import { BooleanFieldOptional, StringFieldOptional } from '../../../decorators';
 export class OauthUrlOptionsDto extends QueryOptionsDto {
   @StringFieldOptional({
     description:
-      'Final URL to redirect after user successfully signed in and this service process the callback. Default to the main page',
+      'Final/Callback URL to call/redirect after user successfully signed in and this service process the callback. ' +
+      'Point this to frontend/backend URL with some query paramaters to get the notification if the login is successful. ' +
+      'Default to the main page',
   })
-  redirect_url?: string;
+  callback_url?: string;
 
   @BooleanFieldOptional({
     description:
-      'If true, calling this API will redirect to login page. If false, return the URL instead',
+      'If true, calling this API will redirect to login page. If false, return the URL instead and redirect it from client side.',
     default: false,
   })
   should_redirect?: boolean;

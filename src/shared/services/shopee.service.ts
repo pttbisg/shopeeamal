@@ -4,6 +4,8 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
+  NotFoundException,
+  Scope,
   ServiceUnavailableException,
 } from '@nestjs/common';
 import * as crypto from 'crypto';
@@ -18,13 +20,15 @@ import {
 } from '../../exceptions/shopee-oauth.exception';
 import { ApiConfigService } from './api-config.service';
 
-@Injectable()
+// The instance will be different for each request unlike other service
+// Allowing the config to be safely set and be removed after the request is completed
+@Injectable({ scope: Scope.REQUEST })
 export class ShopeeService {
   private readonly logger = new Logger(ShopeeService.name);
 
   private host: string;
 
-  private userConfig: UserEntity;
+  private userConfig?: UserEntity;
 
   private oauthConfig?: ShopeeOauthEntity;
 
@@ -38,7 +42,41 @@ export class ShopeeService {
     return this.host;
   }
 
-  public getFullUrl(basePath: string, query?): string {
+  public set user(user: UserEntity) {
+    this.userConfig = user;
+    this.setConfig(user.environment, user.location);
+  }
+
+  public get user(): UserEntity {
+    if (!this.userConfig) {
+      throw new InternalServerErrorException(
+        'Implementation error. Attempting to access Shopee API with unknown user/partner_id',
+      );
+    }
+
+    return this.userConfig;
+  }
+
+  public set oauth(oauth: ShopeeOauthEntity) {
+    this.oauthConfig = oauth;
+  }
+
+  public get oauth(): ShopeeOauthEntity {
+    if (!this.oauthConfig) {
+      throw new InternalServerErrorException(
+        'Implementation error. Attempting to access Shopee API without valid Oauth',
+      );
+    }
+
+    return this.oauthConfig;
+  }
+
+  // in seconds instead of milliseconds for Shopee usage
+  public get timestamp() {
+    return Math.floor(Date.now() / 1000).toString();
+  }
+
+  private getFullUrl(basePath: string, query?): string {
     const url = new URL(this.getFullPath(basePath), this.baseUrl);
 
     const supportedQuery = Object.entries(query as Record<string, unknown>)
@@ -60,18 +98,31 @@ export class ShopeeService {
     const query = {
       timestamp,
       sign: this.getSignature(basePath, timestamp),
-      partnerId: this.userConfig.partnerId,
-      ...(this.oauthConfig && {
-        shop_id: this.oauthConfig.shopId,
-        access_token: this.oauthConfig.accessToken,
-      }),
+      partner_id: Number(this.user.partnerId),
+      ...(this.isOauthResource(basePath) &&
+        this.oauthConfig && {
+          shop_id: Number(this.oauth.shopId),
+          access_token: this.oauth.accessToken,
+        }),
       ...baseQuery,
     };
 
     return this.getFullUrl(basePath, query);
   }
 
+  public isOauthResource(basePath?: string): boolean {
+    const publicPath = ['auth', 'public', 'shop'];
+
+    return !publicPath.some((path) =>
+      this.getFullPath(basePath).startsWith(this.getFullPath(path)),
+    );
+  }
+
   public getFullPath(basePath?: string): string {
+    if (basePath?.startsWith('/')) {
+      basePath = basePath.slice(1);
+    }
+
     return `/api/v2/${basePath}`;
   }
 
@@ -92,41 +143,44 @@ export class ShopeeService {
     }
   }
 
-  public set user(user: UserEntity) {
-    this.userConfig = user;
-    this.setConfig(user.environment, user.location);
-  }
-
-  public set shopeeOauth(shopeeOauth: ShopeeOauthEntity) {
-    this.oauthConfig = shopeeOauth;
-  }
-
-  public get timestamp() {
-    return Date.now().toString();
-  }
-
   public getSignature(basePath: string, timestamp: string) {
-    const message = `${this.userConfig.partnerId}${this.getFullPath(
+    let message = `${this.user.partnerId}${this.getFullPath(
       basePath,
     )}${timestamp}`;
 
+    if (this.isOauthResource(basePath)) {
+      message += `${this.oauth.accessToken}${this.oauth.shopId}`;
+      //TODO: Handle path for Merchant API, use merchant id instead of shopId
+    }
+
     return crypto
-      .createHmac('sha256', this.userConfig.partnerKey)
+      .createHmac('sha256', this.user.partnerKey)
       .update(message)
       .digest('hex');
   }
 
-  public async apiPost(path: string, payload, query?) {
-    const url = this.getFullUrl(path, query);
+  private async apiCall(
+    path: string,
+    options: {
+      query?;
+      payload?;
+      method?;
+    },
+  ) {
+    const query = options.query ?? {};
+    const method = options.method ?? 'POST';
+    const payload = options.payload ?? {};
+    const url = this.buildFullUrl(path, query);
 
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
+    const fetchOptions: Record<string, unknown> = { method };
+
+    if (method === 'POST') {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      fetchOptions.headers = { 'Content-Type': 'application/json' };
+      fetchOptions.body = JSON.stringify(payload);
+    }
+
+    const response = await fetch(url, fetchOptions);
     const data = await response.json();
 
     this.logger.debug({
@@ -147,6 +201,21 @@ export class ShopeeService {
     return data;
   }
 
+  public async apiPost(path: string, payload, query?) {
+    return this.apiCall(path, {
+      payload,
+      query,
+      method: 'POST',
+    });
+  }
+
+  public async apiGet(path: string, query?) {
+    return this.apiCall(path, {
+      query,
+      method: 'GET',
+    });
+  }
+
   private throwShopeeSpecificError(status: number, error) {
     switch (status) {
       case HttpStatus.NOT_FOUND:
@@ -162,7 +231,13 @@ export class ShopeeService {
 
     const errorCode: string = error.error ?? '';
     const errorMessage: string = error.message ?? error.msg ?? '';
-    const requiredParams = ['partner_id', 'shop_id', 'timestamp', 'sign'];
+    const requiredParams = [
+      'partner_id',
+      'shop_id',
+      'timestamp',
+      'sign',
+      'access_token',
+    ];
 
     switch (errorCode) {
       case 'error_param':
@@ -170,7 +245,8 @@ export class ShopeeService {
           throw new InternalServerErrorException({
             shopee_error: error,
             message:
-              'Implementation error. One of the required parameters that are handled by this service cannot be provided automatically',
+              'Implementation error when acessing Shopee API. ' +
+              'One of the required parameters that are handled by this service cannot be provided automatically',
           });
         }
 
@@ -179,17 +255,33 @@ export class ShopeeService {
           message:
             'Request parameter error. Check if the parameter is valid from client side or if there is issue on this service',
         });
+      case 'error_not_found':
+        throw new NotFoundException({
+          shopee_error: error,
+          message: 'Request parameter error. Resource not found',
+        });
       case 'error_auth':
+      case 'error_permission':
         throw new ShopeeOauthForbiddenException({ shopee_error: error });
       case 'error_sign':
         throw new InternalServerErrorException({
           shopee_error: error,
           message: 'Implementation error. Shopee API sign is wrong',
         });
+      case 'error_server':
+        throw new ServiceUnavailableException({
+          shopee_error: error,
+          message: 'Server error on internal Shopee side',
+        });
       case 'error_network':
         throw new ServiceUnavailableException({
           shopee_error: error,
           message: 'Network error on internal Shopee side',
+        });
+      case 'order.order_list_invalid_time':
+        throw new NotFoundException({
+          shopee_error: error,
+          message: 'Request parameter error. See shopee_error for the details',
         });
     }
 

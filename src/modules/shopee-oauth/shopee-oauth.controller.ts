@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -19,16 +20,15 @@ import {
 import { QueryOptionsDto } from '../../common/dto/query-options.dto';
 import { StandardErrorDto } from '../../common/dto/standard-error.dto';
 import { RoleType } from '../../constants';
-import { Auth, AuthUser, PublicRoute } from '../../decorators';
+import { AuthUser, PublicRoute } from '../../decorators';
+import { Auth } from '../../decorators/http.decorators';
 import { UserEntity } from '../../modules/user/user.entity';
+import { UserService } from '../../modules/user/user.service';
 import {
   GetAccessTokenByResendCodePayloadDto,
   GetAccessTokenPayloadDto,
 } from './dtos/get-access-token-payload.dto';
-import {
-  OauthCallbackOptionsDto,
-  OauthCallbackPayloadDto,
-} from './dtos/oauth-callback.dto';
+import { OauthCallbackQueryDto } from './dtos/oauth-callback.dto';
 import { OauthUrlOptionsDto } from './dtos/oauth-url-options.dto';
 import { ShopeeOauthResponseDto } from './dtos/shopee-oauth-response.dto';
 import { UrlDto } from './dtos/url.dto';
@@ -36,12 +36,15 @@ import { ShopeeOauthService } from './shopee-oauth.service';
 
 @Controller('shopee/auth')
 @ApiTags('shopee-oauth', 'shopee')
-@Auth([RoleType.USER, RoleType.ADMIN])
+@Auth(false, [RoleType.USER, RoleType.ADMIN])
 @ApiDefaultResponse({
   type: StandardErrorDto,
 })
 export class ShopeeOauthController {
-  constructor(private service: ShopeeOauthService) {}
+  constructor(
+    private service: ShopeeOauthService,
+    private userService: UserService,
+  ) {}
 
   @Get('get_oauth_url')
   @HttpCode(HttpStatus.OK)
@@ -83,7 +86,7 @@ export class ShopeeOauthController {
     @Query() query: QueryOptionsDto,
     @Body() payload: GetAccessTokenPayloadDto,
   ) {
-    return this.service.getAccessToken(user.partnerId, query, payload);
+    return this.service.getAccessToken(user, query, payload);
   }
 
   @Post('get_token_by_resend_code')
@@ -93,11 +96,7 @@ export class ShopeeOauthController {
     @Query() query: QueryOptionsDto,
     @Body() payload: GetAccessTokenByResendCodePayloadDto,
   ) {
-    return this.service.getAccessTokenByResendCode(
-      user.partnerId,
-      query,
-      payload,
-    );
+    return this.service.getAccessTokenByResendCode(user, query, payload);
   }
 
   @Post(['access_token/get', 'refresh_access_token'])
@@ -110,30 +109,34 @@ export class ShopeeOauthController {
     @AuthUser() user: UserEntity,
     @Query() query: QueryOptionsDto,
   ) {
-    return this.service.refreshAccessToken(user.partnerId, query);
+    return this.service.refreshAccessToken(user, query);
   }
 
-  @Post('callback')
-  @HttpCode(HttpStatus.ACCEPTED)
+  @Get('callback')
+  @HttpCode(HttpStatus.OK)
   @PublicRoute(true)
-  @ApiAcceptedResponse({
-    type: UrlDto,
-    description: 'Callback after successful Oauth',
-  })
-  async webhookCallback(
-    @Query() query: OauthCallbackOptionsDto,
-    @Body() payload: OauthCallbackPayloadDto,
-    @Res() res,
-  ): Promise<UrlDto> {
+  async webhookCallback(@Query() query: OauthCallbackQueryDto, @Res() res) {
+    const user = await this.userService.findOne({
+      partnerId: query.partner_id,
+    });
+
+    if (!user) {
+      throw new BadRequestException('partner_id is invalid');
+    }
+
     await this.service.getAccessToken(
-      query.partner_id,
+      user,
       {
         user_id: query.user_id,
         shop_id: query.shop_id,
       },
-      payload,
+      {
+        code: query.code,
+        shop_id: Number(query.shop_id),
+        main_account_id: query.main_account_id,
+      },
     );
 
-    return res.redirect(query.redirect_url);
+    res.redirect(query.callback_url);
   }
 }

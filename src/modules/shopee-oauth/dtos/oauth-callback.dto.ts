@@ -1,4 +1,8 @@
-import { NumberFieldOptional, StringField } from '../../../decorators';
+import {
+  PositiveIntegerFieldOptional,
+  StringField,
+  StringFieldOptional,
+} from '../../../decorators';
 import { OauthUrlOptionsDto } from './oauth-url-options.dto';
 
 export class OauthCallbackOptionsDto extends OauthUrlOptionsDto {
@@ -6,16 +10,16 @@ export class OauthCallbackOptionsDto extends OauthUrlOptionsDto {
   partner_id: string;
 
   @StringField()
-  redirect_url: string;
+  callback_url: string;
 }
 
-export class OauthCallbackPayloadDto {
+export class OauthCallbackQueryDto extends OauthCallbackOptionsDto {
   @StringField()
   code: string;
 
-  @NumberFieldOptional()
-  shop_id?: number;
+  @StringFieldOptional()
+  shop_id?: string;
 
-  @NumberFieldOptional()
+  @PositiveIntegerFieldOptional()
   main_account_id?: number;
 }

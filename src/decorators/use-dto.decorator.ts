@@ -9,3 +9,11 @@ export function UseDto(
     ctor.prototype.dtoClass = dtoClass;
   };
 }
+
+export function UseDtoFunction(
+  dtoClass: () => Constructor<AbstractDto, [AbstractEntity, unknown]>,
+): ClassDecorator {
+  return (ctor) => {
+    ctor.prototype.dtoClass = dtoClass();
+  };
+}

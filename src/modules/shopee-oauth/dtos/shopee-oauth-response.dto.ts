@@ -17,10 +17,10 @@ class RawShopeeOauthResponseDto extends ShopeeResponseDto {
   expire_in: number;
 
   @ApiPropertyOptional()
-  shop_id_list: string[];
+  shop_id_list: number[];
 
   @ApiPropertyOptional()
-  merchant_id_list: string[];
+  merchant_id_list: number[];
 }
 
 export class ShopeeOauthResponseDto extends RawShopeeOauthResponseDto {

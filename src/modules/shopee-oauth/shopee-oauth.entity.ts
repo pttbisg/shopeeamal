@@ -2,7 +2,7 @@ import { Column, Entity, Index, Unique } from 'typeorm';
 
 import { AbstractEntity } from '../../common/abstract.entity';
 import { ShopeeOauthStatus } from '../../constants';
-import { UseDto } from '../../decorators';
+import { UseDto } from '../../decorators/use-dto.decorator';
 import { ShopeeOauthDto } from './dtos/shopee-oauth.dto';
 
 @Entity({ name: 'shopee-oauths' })
@@ -69,4 +69,18 @@ export class ShopeeOauthEntity extends AbstractEntity<ShopeeOauthDto> {
     default: ShopeeOauthStatus.CREATED,
   })
   status: ShopeeOauthStatus;
+
+  public get isAccessTokenExpired(): boolean {
+    const margin = 60 * 1000; // 1 minute
+    const now = new Date();
+
+    return now.getTime() - margin > this.accessTokenExpiredAt.getTime();
+  }
+
+  public get isRefreshTokenExpired(): boolean {
+    const margin = 24 * 60 * 60 * 1000; // 1 day
+    const now = new Date();
+
+    return now.getTime() - margin > this.refreshTokenExpiredAt.getTime();
+  }
 }

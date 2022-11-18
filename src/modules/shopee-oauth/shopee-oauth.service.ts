@@ -29,9 +29,9 @@ export class ShopeeOauthService {
   ) {}
 
   getOauthUrl(user: UserEntity, baseUrl: string, options: OauthUrlOptionsDto) {
-    const callbackUrl = new URL('/callback', baseUrl);
+    const callbackUrl = new URL('/shopee/auth/callback', baseUrl);
     callbackUrl.searchParams.set('partner_id', user.partnerId);
-    options.redirect_url ??= this.apiConfigService.shopeeOauthRedirectUrl;
+    options.callback_url ??= this.apiConfigService.shopeeOauthRedirectUrl;
 
     for (const [key, value] of Object.entries(options)) {
       callbackUrl.searchParams.set(key, `${value}`);
@@ -101,11 +101,13 @@ export class ShopeeOauthService {
   }
 
   async getAccessToken(
-    partnerId: string,
+    user: UserEntity,
     query: QueryOptionsDto,
     payload: GetAccessTokenPayloadDto,
     shouldResend = false,
   ) {
+    this.shopeeService.user = user;
+    const partnerId = user.partnerId;
     const shopId = query.shop_id || payload.shop_id?.toString();
     const oauth = await this.getInitializedOauth(
       partnerId,
@@ -134,13 +136,15 @@ export class ShopeeOauthService {
       payload.main_account_id?.toString() ?? oauth.mainAccountId;
     await this.shopeeOauthRepository.save(oauth);
 
+    const shopeePayload = {
+      partner_id: Number(partnerId),
+      ...payload,
+      shop_id: Number(shopId),
+    };
+    this.shopeeService.oauth = oauth;
     const response = await this.shopeeService.apiPost(
       shouldResend ? 'get_token_by_resend_code' : 'auth/token/get',
-      payload,
-      {
-        partner_id: partnerId,
-        ...query,
-      },
+      shopeePayload,
     );
 
     const updatedOauth = this.buildRefreshedOauthFromResponse(oauth, response);
@@ -151,19 +155,21 @@ export class ShopeeOauthService {
   }
 
   getAccessTokenByResendCode(
-    partnerId: string,
+    user: UserEntity,
     query: QueryOptionsDto,
     payload: GetAccessTokenByResendCodePayloadDto,
   ) {
-    return this.getAccessToken(partnerId, query, {
+    return this.getAccessToken(user, query, {
       code: payload.resend_code,
       ...payload,
     });
   }
 
-  async refreshAccessToken(partnerId: string, query: QueryOptionsDto) {
+  async refreshAccessToken(user: UserEntity, query: QueryOptionsDto) {
+    this.shopeeService.user = user;
+
     const oauth = await this.getAuthorizedOauth(
-      partnerId,
+      user.partnerId,
       query.user_id,
       query.shop_id,
     );
@@ -174,29 +180,33 @@ export class ShopeeOauthService {
       );
     }
 
+    const { response } = await this.refreshToken(oauth);
+
+    return response;
+  }
+
+  async refreshToken(oauth: ShopeeOauthEntity) {
     const payload = {
       refresh_token: oauth.refreshToken,
-      partner_id: oauth.partnerId,
-      shop_id: oauth.shopId,
+      partner_id: Number(oauth.partnerId),
+      shop_id: Number(oauth.shopId),
     };
+
+    this.shopeeService.oauth = oauth;
 
     const response = await this.shopeeService.apiPost(
       'auth/access_token/get',
       payload,
-      {
-        partner_id: partnerId,
-        ...query,
-      },
     );
 
     const updatedOauth = this.buildRefreshedOauthFromResponse(oauth, response);
     await this.shopeeOauthRepository.save(updatedOauth);
 
-    return response;
+    return { oauth: updatedOauth, response };
   }
 
   buildRefreshedOauthFromResponse(oauth: ShopeeOauthEntity, response) {
-    const refreshTokenDuration = 30 * 24 * 60 * 60 * 60; // 30 days
+    const refreshTokenDuration = 30 * 24 * 60 * 60 * 1000; // 30 days
     const timestamp = Date.now();
 
     oauth.accessToken = response.access_token;

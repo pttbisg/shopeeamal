@@ -1,7 +1,14 @@
-import { StringField } from '../../../decorators';
+import { PositiveIntegerFieldOptional, StringField } from '../../../decorators';
+export class GetAccessTokenPayloadDto {
+  @StringField()
+  code: string;
 
-export { OauthCallbackPayloadDto as GetAccessTokenPayloadDto } from './oauth-callback.dto';
+  @PositiveIntegerFieldOptional()
+  shop_id?: number;
 
+  @PositiveIntegerFieldOptional()
+  main_account_id?: number;
+}
 export class GetAccessTokenByResendCodePayloadDto {
   @StringField()
   resend_code: string;

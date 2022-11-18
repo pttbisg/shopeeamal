@@ -111,6 +111,23 @@ export function NumberFieldOptional(
   );
 }
 
+export function PositiveIntegerField(
+  options: Omit<ApiPropertyOptions, 'type'> & INumberFieldOptions = {},
+): PropertyDecorator {
+  return applyDecorators(
+    NumberField({ int: true, isPositive: true, ...options }),
+  );
+}
+
+export function PositiveIntegerFieldOptional(
+  options: Omit<ApiPropertyOptions, 'type'> & INumberFieldOptions = {},
+): PropertyDecorator {
+  return applyDecorators(
+    IsOptional(),
+    NumberField({ int: true, isPositive: true, ...options }),
+  );
+}
+
 export function StringField(
   options: Omit<ApiPropertyOptions, 'type'> & IStringFieldOptions = {},
 ): PropertyDecorator {

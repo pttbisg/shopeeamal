@@ -10,7 +10,8 @@ import { ApiDefaultResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
 import { StandardErrorDto } from '../../common/dto/standard-error.dto';
 import { RoleType } from '../../constants';
-import { Auth, AuthUser, Roles } from '../../decorators';
+import { AuthUser } from '../../decorators';
+import { Auth, Roles } from '../../decorators/http.decorators';
 import { UserDto } from '../user/dtos/user.dto';
 import { UserEntity } from '../user/user.entity';
 import { UserService } from '../user/user.service';
@@ -19,7 +20,7 @@ import { UserRegisterDto } from './dto/UserRegisterDto';
 
 @Controller('auth')
 @ApiTags('auth')
-@Auth([RoleType.ADMIN])
+@Auth(false, [RoleType.ADMIN])
 @ApiDefaultResponse({
   type: StandardErrorDto,
 })
