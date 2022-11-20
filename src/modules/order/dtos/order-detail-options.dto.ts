@@ -1,7 +1,7 @@
 import { QueryOptionsDto } from '../../../common/dto/query-options.dto';
 import { StringField, StringFieldOptional } from '../../../decorators';
 
-enum OrderDetailOptionalField {
+export enum OrderDetailOptionalField {
   buyer_user_id = 'buyer_user_id',
   buyer_username = 'buyer_username',
   estimated_shipping_fee = 'estimated_shipping_fee',
@@ -37,11 +37,12 @@ enum OrderDetailOptionalField {
 
 export class OrderDetailOptionsDto extends QueryOptionsDto {
   @StringField({ isArray: true })
-  order_sn_list: string[];
+  order_sn_list: string[] | string;
 
   @StringFieldOptional({
     isArray: true,
     example: Object.values(OrderDetailOptionalField).join(','),
+    default: OrderDetailOptionalField.item_list.toString(),
   })
-  response_optional_fields: string[];
+  response_optional_fields?: string[] | string;
 }

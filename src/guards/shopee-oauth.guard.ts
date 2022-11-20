@@ -9,7 +9,10 @@ import {
 import { Reflector } from '@nestjs/core';
 import type { UserEntity } from 'modules/user/user.entity';
 
-import { ShopeeOauthUnathorizedException } from '../exceptions/shopee-oauth.exception';
+import {
+  ShopeeOauthForbiddenException,
+  ShopeeOauthUnathorizedException,
+} from '../exceptions/shopee-oauth.exception';
 import { ShopeeOauthService } from '../modules/shopee-oauth/shopee-oauth.service';
 import { ShopeeService } from '../shared/services/shopee.service';
 
@@ -65,6 +68,16 @@ export class ShopeeOauthGuard implements CanActivate {
         if (error instanceof ServiceUnavailableException) {
           throw new ServiceUnavailableException({
             message: 'Error on Shopee side when refreshing access token',
+            error: error.getResponse(),
+          });
+        } else if (
+          error instanceof ShopeeOauthUnathorizedException ||
+          error instanceof ShopeeOauthForbiddenException
+        ) {
+          throw new ShopeeOauthUnathorizedException({
+            message:
+              'Unauthorized access on Shopee side when refreshing access token. ' +
+              'Try to ask the user to reauthorize this service to their Shopee account',
             error: error.getResponse(),
           });
         } else if (error instanceof HttpException) {

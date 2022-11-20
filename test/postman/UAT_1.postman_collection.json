@@ -1,0 +1,1193 @@
+{
+	"info": {
+		"_postman_id": "8312036b-2766-4ad6-9cde-105f84d55673",
+		"name": "Shopee Service UAT #1",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "23771626"
+	},
+	"item": [
+		{
+			"name": "0 Health",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Http status should be okay\", () => {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Database should be up\", () => {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response.info.database.status).to.equal(\"up\")",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/health",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"health"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "1 Auth API",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Http status should be okay\", () => {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"User info should be exist\", () => {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response.role).to.equal(\"USER\")",
+							"    pm.expect(response.status).to.equal(\"ACTIVE\")",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/auth/me",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"auth",
+						"me"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "1A Auth API (Wrong Credentials)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Http status should be unathorized\", () => {",
+							"    pm.response.to.have.status(401);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "apikey",
+					"apikey": [
+						{
+							"key": "value",
+							"value": "wrong_value",
+							"type": "string"
+						},
+						{
+							"key": "key",
+							"value": "X-API-Key",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/auth/me",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"auth",
+						"me"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "1B Auth API (Wrong Resources)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Http status should be forbidden\", () => {",
+							"    pm.response.to.have.status(403);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/users",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "2 Shopee Oauth URL",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const sdk = require('postman-collection');",
+							"",
+							"pm.test(\"Http status should be okay\", () => {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Url should be exist\", () => {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response.url).to.be.a('string')",
+							"    pm.expect(new sdk.Url(response.url)).to.be.an.instanceof(sdk.Url)",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/shopee/auth/get_oauth_url?user_id={{userId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"shopee",
+						"auth",
+						"get_oauth_url"
+					],
+					"query": [
+						{
+							"key": "user_id",
+							"value": "{{userId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "2A Shopee Failed Oauth (Service Check)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Http status should be unathorized\", () => {",
+							"    pm.response.to.have.status(401);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/shopee/order/get_order_list?user_id=wrong_id",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"shopee",
+						"order",
+						"get_order_list"
+					],
+					"query": [
+						{
+							"key": "user_id",
+							"value": "wrong_id"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "2A Shopee Failed Oauth (Shopee Check) Copy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Http status should be unathorized\", () => {",
+							"    pm.response.to.have.status(401);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/shopee/order/get_order_list?user_id={{userIdInvalid}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"shopee",
+						"order",
+						"get_order_list"
+					],
+					"query": [
+						{
+							"key": "user_id",
+							"value": "{{userIdInvalid}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3 Shopee Get Access Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Skip the test\", () => {",
+							"   ",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"code\": \"dummy\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/shopee/auth/token/get?user_id={{userIdInvalid}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"shopee",
+						"auth",
+						"token",
+						"get"
+					],
+					"query": [
+						{
+							"key": "user_id",
+							"value": "{{userIdInvalid}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "4 Shopee Refresh Access Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Http status should be okay\", () => {",
+							"    pm.response.to.have.status(202);",
+							"});",
+							"",
+							"pm.test(\"Token exist\", () => {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response.refresh_token).to.be.a('string')",
+							"    pm.expect(response.access_token).to.be.a('string')",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/shopee/auth/access_token/get?user_id={{userId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"shopee",
+						"auth",
+						"access_token",
+						"get"
+					],
+					"query": [
+						{
+							"key": "user_id",
+							"value": "{{userId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "5A Get Tracking Number",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Http status should be okay\", () => {",
+							"    pm.response.to.have.status(202);",
+							"});",
+							"",
+							"pm.test(\"Tracking exist\", () => {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response.refresh_token).to.be.a('string')",
+							"    pm.expect(response.access_token).to.be.a('string')",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/shopee/logistics/get_tracking_number?user_id={{userId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"shopee",
+						"logistics",
+						"get_tracking_number"
+					],
+					"query": [
+						{
+							"key": "user_id",
+							"value": "{{userId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "5B Get Waybill",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Http status should be okay\", () => {",
+							"    pm.response.to.have.status(202);",
+							"});",
+							"",
+							"pm.test(\"Waybill exist\", () => {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response.refresh_token).to.be.a('string')",
+							"    pm.expect(response.access_token).to.be.a('string')",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/shopee/first_mile/get_waybill?user_id={{userId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"shopee",
+						"first_mile",
+						"get_waybill"
+					],
+					"query": [
+						{
+							"key": "user_id",
+							"value": "{{userId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "5C Get Waybill (Invalid)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Http status should be not found\", () => {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Error should be not found from Shopee side\", () => {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response.shopee_error.error).to.be.equal('error_not_found')",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/shopee/first_mile/get_waybill?user_id={{userId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"shopee",
+						"first_mile",
+						"get_waybill"
+					],
+					"query": [
+						{
+							"key": "user_id",
+							"value": "{{userId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "6 Get Order List",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Http status should be okay\", () => {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response should be exist\", () => {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response.response).to.have.property('order_list')",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/shopee/order/get_order_list?user_id={{userId}}&time_range_field=create_time&time_from={{pastTimestamp}}&time_to={{$timestamp}}&page_size=10",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"shopee",
+						"order",
+						"get_order_list"
+					],
+					"query": [
+						{
+							"key": "user_id",
+							"value": "{{userId}}"
+						},
+						{
+							"key": "time_range_field",
+							"value": "create_time"
+						},
+						{
+							"key": "time_from",
+							"value": "{{pastTimestamp}}"
+						},
+						{
+							"key": "time_to",
+							"value": "{{$timestamp}}"
+						},
+						{
+							"key": "page_size",
+							"value": "10"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "7 Get Order Including Line Items",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Http status should be okay\", () => {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Order detail should be valid\", () => {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response.response.order_list).to.have.length.above(0)",
+							"",
+							"    const order = response.response.order_list[0]",
+							"    pm.expect(order.order_sn).to.eq(pm.environment.get('orderSn'))",
+							"});",
+							"",
+							"pm.test(\"Line item should be valid\", () => {",
+							"    const order = pm.response.json().response.order_list[0]",
+							"    pm.expect(order).to.have.property('item_list')",
+							"    pm.expect(order.item_list).to.have.length.above(0)",
+							"",
+							"    const item = order.item_list[0]",
+							"    pm.expect(item.item_id).to.be.a('number')",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/shopee/order/get_order_detail?user_id={{userId}}&order_sn_list={{orderSn}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"shopee",
+						"order",
+						"get_order_detail"
+					],
+					"query": [
+						{
+							"key": "user_id",
+							"value": "{{userId}}"
+						},
+						{
+							"key": "order_sn_list",
+							"value": "{{orderSn}}"
+						},
+						{
+							"key": "response_optional_fields",
+							"value": "item_list,buyer_username",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "7  Get Order (Invalid)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Http status should be not found\", () => {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Error should be not found from Shopee side\", () => {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response.shopee_error.error).to.be.equal('error_not_found')",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/shopee/order/get_order_detail?user_id={{userId}}&order_sn_list=invalidSn",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"shopee",
+						"order",
+						"get_order_detail"
+					],
+					"query": [
+						{
+							"key": "user_id",
+							"value": "{{userId}}"
+						},
+						{
+							"key": "order_sn_list",
+							"value": "invalidSn"
+						},
+						{
+							"key": "response_optional_fields",
+							"value": "item_list",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "8 Get SKU (Item List)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Http status should be okay\", () => {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\" detail should be valid\", () => {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response.response.order_list).to.have.length.above(0)",
+							"",
+							"    const order = response.response.order_list[0]",
+							"    pm.expect(order.order_sn).to.eq(pm.environment.get('orderSn'))",
+							"});",
+							"",
+							"pm.test(\"Linte item should be valid\", () => {",
+							"    const order = pm.response.json().response.order_list[0]",
+							"    pm.expect(order).to.have.property('item_list')",
+							"    pm.expect(order.item_list).to.have.length.above(0)",
+							"",
+							"    const item = order.item_list[0]",
+							"    pm.expect(item.item_id).to.be.a('number')",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/shopee/product/get_item_list?user_id={{userId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"shopee",
+						"product",
+						"get_item_list"
+					],
+					"query": [
+						{
+							"key": "user_id",
+							"value": "{{userId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "9 Get SKU (Item)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Http status should be okay\", () => {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\" detail should be valid\", () => {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response.response.order_list).to.have.length.above(0)",
+							"",
+							"    const order = response.response.order_list[0]",
+							"    pm.expect(order.order_sn).to.eq(pm.environment.get('orderSn'))",
+							"});",
+							"",
+							"pm.test(\"Linte item should be valid\", () => {",
+							"    const order = pm.response.json().response.order_list[0]",
+							"    pm.expect(order).to.have.property('item_list')",
+							"    pm.expect(order.item_list).to.have.length.above(0)",
+							"",
+							"    const item = order.item_list[0]",
+							"    pm.expect(item.item_id).to.be.a('number')",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/shopee/product/get_item_base_info?user_id={{userId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"shopee",
+						"product",
+						"get_item_base_info"
+					],
+					"query": [
+						{
+							"key": "user_id",
+							"value": "{{userId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "9 Get SKU (Item - Invalid)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Http status should be not found\", () => {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Error should be not found from Shopee side\", () => {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response.shopee_error.error).to.be.equal('error_not_found')",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/shopee/product/get_item_base_info?user_id={{userId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"shopee",
+						"product",
+						"get_item_base_info"
+					],
+					"query": [
+						{
+							"key": "user_id",
+							"value": "{{userId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "10 Get SKU (Model)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Http status should be okay\", () => {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\" detail should be valid\", () => {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response.response.order_list).to.have.length.above(0)",
+							"",
+							"    const order = response.response.order_list[0]",
+							"    pm.expect(order.order_sn).to.eq(pm.environment.get('orderSn'))",
+							"});",
+							"",
+							"pm.test(\"Linte item should be valid\", () => {",
+							"    const order = pm.response.json().response.order_list[0]",
+							"    pm.expect(order).to.have.property('item_list')",
+							"    pm.expect(order.item_list).to.have.length.above(0)",
+							"",
+							"    const item = order.item_list[0]",
+							"    pm.expect(item.item_id).to.be.a('number')",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/shopee/product/get_model_list?user_id={{userId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"shopee",
+						"product",
+						"get_model_list"
+					],
+					"query": [
+						{
+							"key": "user_id",
+							"value": "{{userId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "10A Get SKU (Model - Invalid)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Http status should be not found\", () => {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Error should be not found from Shopee side\", () => {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response.shopee_error.error).to.be.equal('error_not_found')",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/shopee/product/get_model_list?user_id={{userId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"shopee",
+						"product",
+						"get_model_list"
+					],
+					"query": [
+						{
+							"key": "user_id",
+							"value": "{{userId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "14 Update Inventory",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Http status should be okay\", () => {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\" detail should be valid\", () => {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response.response.order_list).to.have.length.above(0)",
+							"",
+							"    const order = response.response.order_list[0]",
+							"    pm.expect(order.order_sn).to.eq(pm.environment.get('orderSn'))",
+							"});",
+							"",
+							"pm.test(\"Linte item should be valid\", () => {",
+							"    const order = pm.response.json().response.order_list[0]",
+							"    pm.expect(order).to.have.property('item_list')",
+							"    pm.expect(order.item_list).to.have.length.above(0)",
+							"",
+							"    const item = order.item_list[0]",
+							"    pm.expect(item.item_id).to.be.a('number')",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/shopee/product/update_stock?user_id={{userId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"shopee",
+						"product",
+						"update_stock"
+					],
+					"query": [
+						{
+							"key": "user_id",
+							"value": "{{userId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "apikey",
+		"apikey": [
+			{
+				"key": "in",
+				"value": "header",
+				"type": "string"
+			},
+			{
+				"key": "value",
+				"value": "{{apiKey}}",
+				"type": "string"
+			},
+			{
+				"key": "key",
+				"value": "X-API-KEY",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"const pastTimestamp= Math.floor((Date.now() /1000)) - 14 * 24 * 60 * 60;",
+					"pm.variables.set(\"pastTimestamp\", pastTimestamp)"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

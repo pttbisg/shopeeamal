@@ -84,7 +84,10 @@ Not available.
 
 ### E2E Test
 
-TODO
+1. Copy `UAT_1.postman_environment.json.example` to `UAT_1.postman_environment.json` and fill the details. Alternatively, open it with Postman to make it easier.
+2. Run `yarn run test:api`. Or use Postman app to edit the test or run it in visual environment.
+
+
 
 ## Deployment
 

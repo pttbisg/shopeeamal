@@ -85,9 +85,10 @@ export class ShopeeService {
           typeof value === 'string' ||
           typeof value === 'number' ||
           typeof value === 'boolean' ||
-          value instanceof Date, // Date will be default ISO format without ':'
+          Array.isArray(value) || // TODO: Should only support array of primitive types, format as comma separated string
+          value instanceof Date, // Date will be default ISO format without ':'. TODO: Format as timestamp in seconds
       )
-      .map(([key, value]) => [key, value as string]);
+      .map(([key, value]) => [key, value as string]); // TODO: Do autoformat base on type and remove the unsupported conversions
     const params = new URLSearchParams(supportedQuery);
 
     return `${url}?${params}`;

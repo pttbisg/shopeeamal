@@ -3,7 +3,10 @@ import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
 import { RoleType } from '../../constants';
 import { Auth } from '../../decorators/http.decorators';
-import { OrderDetailOptionsDto } from './dtos/order-detail-options.dto';
+import {
+  OrderDetailOptionalField,
+  OrderDetailOptionsDto,
+} from './dtos/order-detail-options.dto';
 import { OrderDetailResponseDto } from './dtos/order-detail-response.dto';
 import { OrderListOptionsDto } from './dtos/order-list-options.dto';
 import { OrderListResponseDto } from './dtos/order-list-response.dto';
@@ -36,6 +39,17 @@ export class OrderController {
   getOrderDetail(
     @Query() options: OrderDetailOptionsDto,
   ): Promise<OrderDetailResponseDto> {
+    const essentialField = OrderDetailOptionalField.item_list.toString();
+    const fieldOptions = options.response_optional_fields;
+
+    if (fieldOptions) {
+      options.response_optional_fields = fieldOptions.includes(essentialField)
+        ? fieldOptions
+        : `${fieldOptions},${essentialField}`;
+    } else {
+      options.response_optional_fields = essentialField;
+    }
+
     return this.orderService.getOrderDetail(options);
   }
 }
