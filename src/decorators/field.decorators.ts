@@ -41,15 +41,17 @@ import { IsPassword, IsPhoneNumber, IsTmpKey } from './validator.decorators';
 
 type RequireField<T, K extends keyof T> = T & Required<Pick<T, K>>;
 
-interface IStringFieldOptions {
+export interface IStringFieldOptions {
   minLength?: number;
   maxLength?: number;
   toLowerCase?: boolean;
   toUpperCase?: boolean;
   swagger?: boolean;
+  explode?: boolean;
+  isInteger?: boolean;
 }
 
-interface INumberFieldOptions {
+export interface INumberFieldOptions {
   each?: boolean;
   minimum?: number;
   maximum?: number;
@@ -112,7 +114,7 @@ export function NumberFieldOptional(
 }
 
 export function PositiveIntegerField(
-  options: Omit<ApiPropertyOptions, 'type'> & INumberFieldOptions = {},
+  options: Omit<ApiPropertyOptions, 'type'> = {},
 ): PropertyDecorator {
   return applyDecorators(
     NumberField({ int: true, isPositive: true, ...options }),
@@ -120,28 +122,73 @@ export function PositiveIntegerField(
 }
 
 export function PositiveIntegerFieldOptional(
-  options: Omit<ApiPropertyOptions, 'type'> & INumberFieldOptions = {},
+  options: Omit<ApiPropertyOptions, 'type'> = {},
 ): PropertyDecorator {
   return applyDecorators(
     IsOptional(),
-    NumberField({ int: true, isPositive: true, required: false, ...options }),
+    PositiveIntegerField({ required: false, ...options }),
   );
+}
+
+function StringArray(
+  explode = false,
+  defaultDescription?,
+  isInteger = false,
+): PropertyDecorator {
+  return (target: object, propertyKey: string) => {
+    const metakey = 'swagger/apiModelProperties';
+    const existingMetadata = Reflect.getMetadata(metakey, target, propertyKey);
+    const example = existingMetadata.example;
+    let samples = isInteger
+      ? [12_345, 67_890, 4567]
+      : ['string1', 'string2', 'string3'];
+
+    if (typeof example === 'string' || example instanceof String) {
+      const splitted = example.split(',');
+      samples = splitted.length > 1 ? splitted : samples;
+    } else if (Array.isArray(example) && example.length > 1) {
+      samples = example;
+    }
+
+    const type = explode ? [String] : String;
+    const separator = explode ? `&${propertyKey}=` : ',';
+    const newDescription =
+      (explode
+        ? `On Query Params, Send as multiple parameter.`
+        : 'On Query Params, format/serialized as single string with comma separated.') +
+      ` Eg: ${propertyKey}=${samples.join(separator)}`;
+
+    const metadataToSave = {
+      ...existingMetadata,
+      type,
+      description: defaultDescription ?? newDescription,
+    };
+
+    Reflect.defineMetadata(metakey, metadataToSave, target, propertyKey);
+  };
 }
 
 export function StringField(
   options: Omit<ApiPropertyOptions, 'type'> & IStringFieldOptions = {},
 ): PropertyDecorator {
-  const decorators = [IsNotEmpty(), IsString(), Trim()];
+  const decorators = [IsNotEmpty(), Trim()];
 
   if (options.swagger !== false) {
     decorators.push(
       ApiProperty({
         type: String,
-        description: options.isArray
-          ? 'On Query Params, format/serialized as single string with comma separated. Eg: string1,string2'
-          : undefined,
         ...options,
       }),
+    );
+  }
+
+  if (!options.isArray && !options.explode) {
+    decorators.push(IsString());
+  }
+
+  if (options.isArray) {
+    decorators.push(
+      StringArray(options.explode, options.description, options.isInteger),
     );
   }
 

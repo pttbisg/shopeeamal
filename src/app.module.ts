@@ -9,6 +9,7 @@ import path from 'path';
 import { AuthModule } from './modules/auth/auth.module';
 import { HealthCheckerModule } from './modules/health-checker/health-checker.module';
 import { OrderModule } from './modules/order/order.module';
+import { ProductModule } from './modules/product/product.module';
 import { ShopeeOauthModule } from './modules/shopee-oauth/shopee-oauth.module';
 import { UserModule } from './modules/user/user.module';
 import { ApiConfigService } from './shared/services/api-config.service';
@@ -20,6 +21,7 @@ import { SharedModule } from './shared/shared.module';
     UserModule,
     ShopeeOauthModule,
     OrderModule,
+    ProductModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',

@@ -3,6 +3,7 @@ export * from './auth-user.decorator';
 export * from './field.decorators';
 export * from './property.decorators';
 export * from './public-route.decorator';
+export * from './shopee-field.decorator';
 export * from './swagger.schema';
 export * from './transform.decorators';
 export * from './translate.decorator';

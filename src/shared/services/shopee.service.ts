@@ -79,17 +79,28 @@ export class ShopeeService {
   private getFullUrl(basePath: string, query?): string {
     const url = new URL(this.getFullPath(basePath), this.baseUrl);
 
-    const supportedQuery = Object.entries(query as Record<string, unknown>)
-      .filter(
-        ([_, value]) =>
-          typeof value === 'string' ||
-          typeof value === 'number' ||
-          typeof value === 'boolean' ||
-          Array.isArray(value) || // TODO: Should only support array of primitive types, format as comma separated string
-          value instanceof Date, // Date will be default ISO format without ':'. TODO: Format as timestamp in seconds
-      )
-      .map(([key, value]) => [key, value as string]); // TODO: Do autoformat base on type and remove the unsupported conversions
-    const params = new URLSearchParams(supportedQuery);
+    const params = new URLSearchParams();
+
+    for (const [key, value] of Object.entries(
+      query as Record<string, unknown>,
+    )) {
+      if (
+        typeof value === 'string' ||
+        typeof value === 'number' ||
+        typeof value === 'boolean'
+      ) {
+        params.append(key, `${value}`);
+      } else if (value instanceof Date) {
+        params.append(key, `${Math.floor(value.getTime() / 1000)}`);
+      } else if (Array.isArray(value)) {
+        // TODO: Make this as recursive function instead
+        // TODO: Handle case where some Shopee API need to be formatted as (1) param=a,b,c and other as (2) param=a&param=b&param=c
+        // For now, we assume that the (1) case will already formatted as string from API parameter
+        for (const v of value) {
+          params.append(key, `${v}`);
+        }
+      }
+    }
 
     return `${url}?${params}`;
   }
@@ -218,18 +229,6 @@ export class ShopeeService {
   }
 
   private throwShopeeSpecificError(status: number, error) {
-    switch (status) {
-      case HttpStatus.NOT_FOUND:
-        throw new InternalServerErrorException({
-          shopee_error: error,
-          message: 'Implementation error. Shopee API is not found',
-        });
-      case HttpStatus.UNAUTHORIZED:
-        throw new ShopeeOauthUnathorizedException({ shopee_error: error });
-      case HttpStatus.FORBIDDEN:
-        throw new ShopeeOauthForbiddenException({ shopee_error: error });
-    }
-
     const errorCode: string = error.error ?? '';
     const errorMessage: string = error.message ?? error.msg ?? '';
     const requiredParams = [
@@ -242,11 +241,13 @@ export class ShopeeService {
 
     switch (errorCode) {
       case 'error_param':
+      case 'error.param':
+      case 'error_param_shop_id_not_found':
         if (requiredParams.some((param) => errorMessage.includes(param))) {
           throw new InternalServerErrorException({
             shopee_error: error,
             message:
-              'Implementation error when acessing Shopee API. ' +
+              'Implementation error when accessing Shopee API. ' +
               'One of the required parameters that are handled by this service cannot be provided automatically',
           });
         }
@@ -257,6 +258,7 @@ export class ShopeeService {
             'Request parameter error. Check if the parameter is valid from client side or if there is issue on this service',
         });
       case 'error_not_found':
+      case 'error_item_not_found':
         throw new NotFoundException({
           shopee_error: error,
           message: 'Request parameter error. Resource not found',
@@ -269,21 +271,41 @@ export class ShopeeService {
           shopee_error: error,
           message: 'Implementation error. Shopee API sign is wrong',
         });
-      case 'error_server':
-        throw new ServiceUnavailableException({
-          shopee_error: error,
-          message: 'Server error on internal Shopee side',
-        });
-      case 'error_network':
-        throw new ServiceUnavailableException({
-          shopee_error: error,
-          message: 'Network error on internal Shopee side',
-        });
       case 'order.order_list_invalid_time':
-        throw new NotFoundException({
+      case 'error_param_item_status':
+      case 'error_update_time_range':
+      case 'error_invalid_language':
+      case 'error_desc_image_no_pass':
+        throw new BadRequestException({
           shopee_error: error,
           message: 'Request parameter error. See shopee_error for the details',
         });
+      case 'error_server':
+      case 'error_network':
+      case 'error_system_busy':
+      case 'error_inner':
+      case 'error_query_condition_list_limit':
+      case 'error_query_query_limit_too_large':
+      case 'error_get_shop_fail':
+      case 'error_slash_price_load':
+        throw new ServiceUnavailableException({
+          shopee_error: error,
+          message: 'Service error on internal Shopee side',
+        });
+    }
+
+    switch (status) {
+      case HttpStatus.NOT_FOUND:
+        throw new NotFoundException({
+          shopee_error: error,
+          message:
+            'Not Found. Check the error to know whether the resource not exist in the request parameter, ' +
+            'or if this is implementation error',
+        });
+      case HttpStatus.UNAUTHORIZED:
+        throw new ShopeeOauthUnathorizedException({ shopee_error: error });
+      case HttpStatus.FORBIDDEN:
+        throw new ShopeeOauthForbiddenException({ shopee_error: error });
     }
 
     throw new InternalServerErrorException({

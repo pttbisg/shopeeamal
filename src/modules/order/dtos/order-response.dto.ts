@@ -1,21 +1,37 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
+import { ObjectResponse } from '../../../common/dto/shopee-response.dto';
 import {
   BooleanField,
   BooleanFieldOptional,
+  EnumField,
+  EnumFieldOptional,
   NumberFieldOptional,
   PositiveIntegerField,
   PositiveIntegerFieldOptional,
   StringField,
   StringFieldOptional,
+  TimestampField,
+  TimestampFieldOptional,
 } from '../../../decorators';
+
+export enum OrderStatus {
+  UNPAID = 'UNPAID',
+  READY_TO_SHIP = 'READY_TO_SHIP',
+  PROCESSED = 'PROCESSED',
+  SHIPPED = 'SHIPPED',
+  COMPLETED = 'COMPLETED',
+  IN_CANCEL = 'IN_CANCEL',
+  CANCELLED = 'CANCELLED',
+  INVOICE_PENDING = 'INVOICE_PENDING',
+}
 
 export class OrderResponse {
   @StringField()
   order_sn: boolean;
 
-  @StringFieldOptional()
-  order_status?: string;
+  @EnumFieldOptional(() => OrderStatus)
+  order_status?: OrderStatus | string;
 
   @StringFieldOptional()
   order_internal_id?: string;
@@ -34,7 +50,7 @@ export class OrderFullResponse extends OrderResponse {
   @NumberFieldOptional()
   total_amount?: number;
 
-  @StringField()
+  @EnumField(() => OrderStatus)
   order_status: string;
 
   @StringFieldOptional()
@@ -49,16 +65,16 @@ export class OrderFullResponse extends OrderResponse {
   @StringFieldOptional()
   message_to_seller?: string;
 
-  @PositiveIntegerField()
+  @TimestampField()
   create_time: number;
 
-  @PositiveIntegerField()
+  @TimestampField()
   update_time: number;
 
   @PositiveIntegerField()
   days_to_ship: number;
 
-  @PositiveIntegerField()
+  @TimestampField()
   ship_by_date: number;
 
   @PositiveIntegerFieldOptional()
@@ -68,7 +84,7 @@ export class OrderFullResponse extends OrderResponse {
   buyer_username?: string;
 
   @ApiPropertyOptional()
-  recipient_address?: Record<string, unknown>;
+  recipient_address?: ObjectResponse;
 
   @NumberFieldOptional()
   actual_shipping_fee?: number;
@@ -79,13 +95,13 @@ export class OrderFullResponse extends OrderResponse {
   @StringFieldOptional()
   note?: string;
 
-  @PositiveIntegerFieldOptional()
+  @TimestampFieldOptional()
   note_update_time?: number;
 
-  @ApiPropertyOptional()
-  item_list?: Array<Record<string, unknown>>;
+  @ApiPropertyOptional({ isArray: true })
+  item_list?: ObjectResponse[];
 
-  @PositiveIntegerFieldOptional()
+  @TimestampFieldOptional()
   pay_time?: number;
 
   @StringFieldOptional()
@@ -115,14 +131,14 @@ export class OrderFullResponse extends OrderResponse {
   @StringFieldOptional()
   fulfillment_flag?: string;
 
-  @PositiveIntegerFieldOptional()
+  @TimestampFieldOptional()
   pickup_done_time?: number;
 
-  @ApiPropertyOptional()
-  package_list?: Array<Record<string, unknown>>;
+  @ApiPropertyOptional({ isArray: true })
+  package_list?: ObjectResponse[];
 
   @ApiPropertyOptional()
-  invoice_data?: Record<string, unknown>;
+  invoice_data?: ObjectResponse;
 
   @StringFieldOptional()
   checkout_shipping_carrier?: string;
@@ -133,10 +149,10 @@ export class OrderFullResponse extends OrderResponse {
   @PositiveIntegerFieldOptional()
   order_chargeable_weight_gram?: number;
 
-  @PositiveIntegerFieldOptional()
+  @TimestampFieldOptional()
   edt_from?: number;
 
-  @PositiveIntegerFieldOptional()
+  @TimestampFieldOptional()
   edt_to?: number;
 
   @StringFieldOptional({ isArray: true })
