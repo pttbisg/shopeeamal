@@ -242,8 +242,6 @@ export class ShopeeService {
     switch (errorCode) {
       case 'error_param':
       case 'error.param':
-      case 'error_param_shop_id_not_found':
-      case 'error_shop_not_found':
         if (requiredParams.some((param) => errorMessage.includes(param))) {
           throw new InternalServerErrorException({
             shopee_error: error,
@@ -258,9 +256,21 @@ export class ShopeeService {
           message:
             'Request parameter error. Check if the parameter is valid from client side or if there is issue on this service',
         });
+      case 'error_param_shop_id_not_found':
+      case 'error_shop_not_found':
+      case 'common.invalid_shop':
+        throw new InternalServerErrorException({
+          shopee_error: error,
+          message:
+            'Implementation error when accessing Shopee API. ' +
+            'One of the required parameters that are handled by this service cannot be provided automatically',
+        });
       case 'error_not_found':
       case 'error_item_not_found':
       case 'product.error_item_not_found':
+      case 'logistics.invalid_error':
+      case 'logistics.package_not_exist':
+      case 'logistics.package_number_not_exist':
         throw new NotFoundException({
           shopee_error: error,
           message: 'Request parameter error. Resource not found',
@@ -278,6 +288,7 @@ export class ShopeeService {
       case 'error_update_time_range':
       case 'error_invalid_language':
       case 'error_desc_image_no_pass':
+      case 'logistics.error_status_limit':
         throw new BadRequestException({
           shopee_error: error,
           message: 'Request parameter error. See shopee_error for the details',
@@ -290,6 +301,7 @@ export class ShopeeService {
       case 'error_query_query_limit_too_large':
       case 'error_get_shop_fail':
       case 'error_slash_price_load':
+      case 'logistics.error_channel_exist':
         throw new ServiceUnavailableException({
           shopee_error: error,
           message: 'Service error on internal Shopee side',
@@ -321,7 +333,7 @@ export class ShopeeService {
     throw new InternalServerErrorException({
       shopee_error: error,
       message:
-        'Unknown error when accessing Shopee API. Check the error message',
+        'Unknown error when accessing Shopee API. Check the error message to determine if it is caused by wrong Request Parameter',
     });
   }
 }

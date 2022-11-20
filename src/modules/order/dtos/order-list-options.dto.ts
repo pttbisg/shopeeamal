@@ -32,14 +32,14 @@ export class OrderListOptionsDto extends QueryOptionsDto {
   page_size: number;
 
   @StringFieldOptional()
-  cursor: string;
+  cursor?: string;
 
   @EnumFieldOptional(() => OrderStatus, { example: OrderStatus.READY_TO_SHIP })
-  status: OrderStatus | string;
+  status?: OrderStatus | string;
 
   @StringEnumArrayQueryFieldOptional(() => OrderListOptionalField, {
     default: OrderListOptionalField.order_status,
   })
-  response_optional_fields: OrderListOptionalField[] | string =
+  response_optional_fields?: OrderListOptionalField[] | string =
     OrderListOptionalField.order_status.toString();
 }

@@ -8,6 +8,7 @@ import path from 'path';
 
 import { AuthModule } from './modules/auth/auth.module';
 import { HealthCheckerModule } from './modules/health-checker/health-checker.module';
+import { LogisticsModule } from './modules/logistics/logistics.module';
 import { OrderModule } from './modules/order/order.module';
 import { ProductModule } from './modules/product/product.module';
 import { ShopeeOauthModule } from './modules/shopee-oauth/shopee-oauth.module';
@@ -21,6 +22,7 @@ import { SharedModule } from './shared/shared.module';
     ShopeeOauthModule,
     OrderModule,
     ProductModule,
+    LogisticsModule,
     UserModule,
     ConfigModule.forRoot({
       isGlobal: true,
