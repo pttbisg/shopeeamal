@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
+import type { QueryOptionsDto } from 'common/dto/query-options.dto';
 
+import type { ShopeeResponseDto } from '../../common/dto/shopee-response.dto';
 import { ShopeeService } from '../../shared/services/shopee.service';
 import { ValidatorService } from '../../shared/services/validator.service';
+import type { ShipOrderPayloadDto } from './dtos/ship-order-payload.dto';
 import type { ShippingParameterOptionsDto } from './dtos/shipping-parameter-options.dto';
 import type { ShippingParameterResponseDto } from './dtos/shipping-parameter-response.dto';
 import type { TrackingInfoOptionsDto } from './dtos/tracking-info-options.dto';
@@ -45,6 +48,20 @@ export class LogisticsService {
         'logistics/get_shipping_parameter',
         options,
       );
+
+    return response;
+  }
+
+  // TODO: Implement this async inside queue
+  async shipOrder(
+    options: QueryOptionsDto,
+    payload: ShipOrderPayloadDto,
+  ): Promise<ShopeeResponseDto> {
+    const response: ShopeeResponseDto = await this.shopeeService.apiPost(
+      'logistics/ship_order',
+      payload,
+      options,
+    );
 
     return response;
   }

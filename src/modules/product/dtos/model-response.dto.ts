@@ -1,8 +1,7 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-
-import { ObjectResponse } from '../../../common/dto/shopee-response.dto';
+import { ObjectResponse } from '../../../common/dto/shopee-object.dto';
 import {
   NumberFieldOptional,
+  ObjectResponseFieldOptional,
   PositiveIntegerField,
   PositiveIntegerFieldOptional,
   StringField,
@@ -13,12 +12,12 @@ export class TierVariation {
   @StringField()
   name: string;
 
-  @ApiProperty()
+  @ObjectResponseFieldOptional()
   option_list: ObjectResponse;
 }
 
 export class Model {
-  @ApiPropertyOptional()
+  @ObjectResponseFieldOptional({ isArray: true })
   price_info?: ObjectResponse[];
 
   @PositiveIntegerField()
@@ -33,10 +32,10 @@ export class Model {
   @StringFieldOptional()
   model_sku?: string;
 
-  @ApiPropertyOptional()
+  @ObjectResponseFieldOptional()
   preorder?: ObjectResponse;
 
-  @ApiPropertyOptional()
+  @ObjectResponseFieldOptional()
   stock_info_v2?: ObjectResponse;
 
   @StringFieldOptional()

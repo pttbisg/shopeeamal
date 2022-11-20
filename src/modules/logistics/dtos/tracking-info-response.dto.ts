@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+import { ObjectResponse } from '../../../common/dto/shopee-object.dto';
 import { ShopeeGetResponseDto } from '../../../common/dto/shopee-response.dto';
 import {
   EnumFieldOptional,
@@ -7,9 +8,9 @@ import {
   StringFieldOptional,
 } from '../../../decorators';
 import { LogisticsStatus } from './logistics.dto';
-import type { TrackingInfo } from './tracking-info.dto';
+import { TrackingInfo } from './tracking-info.dto';
 
-class TrackingInfoResponse {
+class TrackingInfoResponse extends ObjectResponse {
   @StringField()
   order_sn: string;
 
@@ -19,7 +20,7 @@ class TrackingInfoResponse {
   @EnumFieldOptional(() => LogisticsStatus)
   logistics_status?: LogisticsStatus | string;
 
-  @ApiProperty({ isArray: true })
+  @ApiProperty({ type: TrackingInfo, isArray: true })
   tracking_info: TrackingInfo[];
 }
 

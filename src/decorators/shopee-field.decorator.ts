@@ -1,8 +1,10 @@
 import { applyDecorators } from '@nestjs/common';
 import type { ApiPropertyOptions } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional } from 'class-validator';
 import type { IAbstractEnum } from 'common/abstract-enum';
 
+import { ObjectResponse } from '../common/dto/shopee-object.dto';
 import type {
   INumberFieldOptions,
   IStringFieldOptions,
@@ -140,5 +142,25 @@ export function StringEnumArrayQueryExplodeFieldOptional<
   return applyDecorators(
     IsOptional(),
     StringEnumArrayQueryExplodeField(getEnum, { required: false, ...options }),
+  );
+}
+
+export function ObjectResponseField(
+  options: Omit<ApiPropertyOptions, 'type'> = {},
+): PropertyDecorator {
+  return applyDecorators(
+    ApiProperty({
+      type: ObjectResponse,
+      ...options,
+    }),
+  );
+}
+
+export function ObjectResponseFieldOptional(
+  options: Omit<ApiPropertyOptions, 'type'> = {},
+): PropertyDecorator {
+  return applyDecorators(
+    IsOptional(),
+    ObjectResponseField({ required: false, ...options }),
   );
 }

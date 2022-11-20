@@ -1,18 +1,22 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+import { ObjectResponse } from '../../../common/dto/shopee-object.dto';
 import { ShopeeGetResponseDto } from '../../../common/dto/shopee-response.dto';
 import { BooleanField, StringFieldOptional } from '../../../decorators';
-import type { OrderResponse } from './order-response.dto';
+import { OrderResponse } from './order-response.dto';
 
-class OrderListResponse {
+class OrderListResponse extends ObjectResponse {
   @BooleanField()
   more: boolean;
 
   @StringFieldOptional()
   next_cursor?: string;
 
-  @ApiProperty()
+  @ApiProperty({ type: OrderResponse, isArray: true })
   order_list: OrderResponse[];
 }
 
-export class OrderListResponseDto extends ShopeeGetResponseDto<OrderListResponse> {}
+export class OrderListResponseDto extends ShopeeGetResponseDto<OrderListResponse> {
+  @ApiProperty({ type: OrderListResponse })
+  response: OrderListResponse;
+}

@@ -1,11 +1,10 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
-
-import { ObjectResponse } from '../../../common/dto/shopee-response.dto';
+import { ObjectResponse } from '../../../common/dto/shopee-object.dto';
 import {
   BooleanFieldOptional,
   EnumField,
   EnumFieldOptional,
   NumberFieldOptional,
+  ObjectResponseFieldOptional,
   PositiveIntegerField,
   PositiveIntegerFieldOptional,
   StringField,
@@ -61,28 +60,28 @@ export class ItemFullResponse extends ItemResponse {
   @TimestampField()
   update_time: number;
 
-  @ApiPropertyOptional()
+  @ObjectResponseFieldOptional({ isArray: true })
   attribute_list?: ObjectResponse[];
 
-  @ApiPropertyOptional()
+  @ObjectResponseFieldOptional({ isArray: true })
   price_info?: ObjectResponse[];
 
-  @ApiPropertyOptional()
+  @ObjectResponseFieldOptional()
   image?: ObjectResponse;
 
   @StringFieldOptional()
   weight?: string;
 
-  @ApiPropertyOptional()
+  @ObjectResponseFieldOptional()
   dimension?: ObjectResponse;
 
-  @ApiPropertyOptional()
+  @ObjectResponseFieldOptional({ isArray: true })
   logistic_info?: ObjectResponse[];
 
-  @ApiPropertyOptional()
+  @ObjectResponseFieldOptional()
   preorder?: ObjectResponse;
 
-  @ApiPropertyOptional()
+  @ObjectResponseFieldOptional({ isArray: true })
   wholesales?: ObjectResponse[];
 
   @EnumFieldOptional(() => ItemCondition)
@@ -94,10 +93,10 @@ export class ItemFullResponse extends ItemResponse {
   @PositiveIntegerFieldOptional()
   promotion_id?: number;
 
-  @ApiPropertyOptional()
+  @ObjectResponseFieldOptional({ isArray: true })
   video_info?: ObjectResponse[];
 
-  @ApiPropertyOptional()
+  @ObjectResponseFieldOptional()
   brand?: ObjectResponse;
 
   @NumberFieldOptional({ int: true })
@@ -106,13 +105,13 @@ export class ItemFullResponse extends ItemResponse {
   @EnumFieldOptional(() => ItemComplaintPolicy)
   complaint_policy?: ItemComplaintPolicy | string;
 
-  @ApiPropertyOptional()
+  @ObjectResponseFieldOptional()
   tax_info?: ObjectResponse;
 
-  @ApiPropertyOptional()
+  @ObjectResponseFieldOptional()
   stock_info_v2?: ObjectResponse;
 
-  @ApiPropertyOptional()
+  @ObjectResponseFieldOptional()
   description_info?: ObjectResponse;
 
   @StringFieldOptional()

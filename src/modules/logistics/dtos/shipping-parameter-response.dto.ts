@@ -1,19 +1,16 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ObjectResponse } from '../../../common/dto/shopee-object.dto';
+import { ShopeeGetResponseDto } from '../../../common/dto/shopee-response.dto';
+import { ObjectResponseFieldOptional } from '../../../decorators';
 
-import {
-  ObjectResponse,
-  ShopeeGetResponseDto,
-} from '../../../common/dto/shopee-response.dto';
+class ShippingParameterResponse extends ObjectResponse {
+  @ObjectResponseFieldOptional()
+  info_needed?: ObjectResponse;
 
-class ShippingParameterResponse {
-  @ApiProperty()
-  info_needed: ObjectResponse;
+  @ObjectResponseFieldOptional()
+  dropoff?: ObjectResponse;
 
-  @ApiProperty()
-  dropoff: ObjectResponse;
-
-  @ApiProperty()
-  pickup: ObjectResponse;
+  @ObjectResponseFieldOptional()
+  pickup?: ObjectResponse;
 }
 
 export class ShippingParameterResponseDto extends ShopeeGetResponseDto<ShippingParameterResponse> {}

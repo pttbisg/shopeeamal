@@ -4,11 +4,11 @@ import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { RoleType } from '../../constants';
 import { Auth } from '../../decorators/http.decorators';
 import { ItemBaseInfoOptionsDto } from './dtos/item-base-info-options.dto';
-import type { ItemBaseInfoResponseDto } from './dtos/item-base-info-response.dto';
+import { ItemBaseInfoResponseDto } from './dtos/item-base-info-response.dto';
 import { ItemListOptionsDto } from './dtos/item-list-options.dto';
-import type { ItemListResponseDto } from './dtos/item-list-response.dto';
+import { ItemListResponseDto } from './dtos/item-list-response.dto';
 import { ModelListOptionsDto } from './dtos/model-list-options.dto';
-import type { ModelListResponseDto } from './dtos/model-list-response.dto';
+import { ModelListResponseDto } from './dtos/model-list-response.dto';
 import { ProductService } from './product.service';
 
 @Controller('shopee/product')
@@ -20,7 +20,7 @@ export class ProductController {
   @Get('get_item_list')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
-    type: ItemListOptionsDto,
+    type: ItemListResponseDto,
     description: 'Get List of Shopee Item',
   })
   getitemList(
@@ -32,7 +32,7 @@ export class ProductController {
   @Get('get_item_base_info')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
-    type: ItemBaseInfoOptionsDto,
+    type: ItemBaseInfoResponseDto,
     description: 'Get Detail of Shopee Item',
   })
   getItemBaseInfo(
@@ -44,7 +44,7 @@ export class ProductController {
   @Get('get_model_list')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
-    type: ModelListOptionsDto,
+    type: ModelListResponseDto,
     description: 'Get List of Shopee Item Models',
   })
   getModelList(

@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
-import { ObjectResponse } from '../../../common/dto/shopee-response.dto';
+import { ObjectResponse } from '../../../common/dto/shopee-object.dto';
 import {
   BooleanField,
   BooleanFieldOptional,

@@ -1,7 +1,8 @@
+import { ObjectResponse } from '../../../common/dto/shopee-object.dto';
 import { ShopeeGetResponseDto } from '../../../common/dto/shopee-response.dto';
 import { StringField, StringFieldOptional } from '../../../decorators';
 
-class TrackingNumberResponse {
+class TrackingNumberResponse extends ObjectResponse {
   @StringField()
   tracking_number: string;
 

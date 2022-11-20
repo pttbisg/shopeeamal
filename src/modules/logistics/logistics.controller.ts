@@ -1,8 +1,19 @@
-import { Controller, Get, HttpCode, HttpStatus, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
+import { QueryOptionsDto } from '../../common/dto/query-options.dto';
+import { ShopeeResponseDto } from '../../common/dto/shopee-response.dto';
 import { RoleType } from '../../constants';
 import { Auth } from '../../decorators/http.decorators';
+import type { ShipOrderPayloadDto } from './dtos/ship-order-payload.dto';
 import { ShippingParameterOptionsDto } from './dtos/shipping-parameter-options.dto';
 import { ShippingParameterResponseDto } from './dtos/shipping-parameter-response.dto';
 import { TrackingInfoOptionsDto } from './dtos/tracking-info-options.dto';
@@ -50,5 +61,21 @@ export class LogisticsController {
     @Query() options: ShippingParameterOptionsDto,
   ): Promise<ShippingParameterResponseDto> {
     return this.logisticsService.getShippingParameter(options);
+  }
+
+  @Post('ship_order')
+  @HttpCode(HttpStatus.ACCEPTED)
+  @ApiOkResponse({
+    type: ShopeeResponseDto,
+    description: 'Ship Order base on get_shipping_parameter',
+  })
+  shipOrder(
+    @Query() options: QueryOptionsDto,
+    @Body() payload: ShipOrderPayloadDto | Map<string, unknown>,
+  ): Promise<ShopeeResponseDto> {
+    return this.logisticsService.shipOrder(
+      options,
+      payload as ShipOrderPayloadDto,
+    );
   }
 }
