@@ -92,7 +92,7 @@ export class ItemFullResponse extends ItemResponse {
   has_model?: boolean;
 
   @PositiveIntegerFieldOptional()
-  promotion_id: number;
+  promotion_id?: number;
 
   @ApiPropertyOptional()
   video_info?: ObjectResponse[];

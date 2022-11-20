@@ -7,6 +7,8 @@ import { ItemBaseInfoOptionsDto } from './dtos/item-base-info-options.dto';
 import type { ItemBaseInfoResponseDto } from './dtos/item-base-info-response.dto';
 import { ItemListOptionsDto } from './dtos/item-list-options.dto';
 import type { ItemListResponseDto } from './dtos/item-list-response.dto';
+import { ModelListOptionsDto } from './dtos/model-list-options.dto';
+import type { ModelListResponseDto } from './dtos/model-list-response.dto';
 import { ProductService } from './product.service';
 
 @Controller('shopee/product')
@@ -37,5 +39,17 @@ export class ProductController {
     @Query() options: ItemBaseInfoOptionsDto,
   ): Promise<ItemBaseInfoResponseDto> {
     return this.productService.getItemBaseInfo(options);
+  }
+
+  @Get('get_model_list')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    type: ModelListOptionsDto,
+    description: 'Get List of Shopee Item Models',
+  })
+  getModelList(
+    @Query() options: ModelListOptionsDto,
+  ): Promise<ModelListResponseDto> {
+    return this.productService.getModelList(options);
   }
 }

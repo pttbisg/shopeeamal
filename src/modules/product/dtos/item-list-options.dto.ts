@@ -1,7 +1,7 @@
 import { QueryOptionsDto } from '../../../common/dto/query-options.dto';
 import {
   NumberField,
-  PositiveIntegerField,
+  PageSizeField,
   StringEnumArrayQueryExplodeField,
   TimestampFieldOptional,
 } from '../../../decorators';
@@ -11,7 +11,7 @@ export class ItemListOptionsDto extends QueryOptionsDto {
   @NumberField({ int: true, example: 0 })
   offset: number;
 
-  @PositiveIntegerField({ example: 10 })
+  @PageSizeField()
   page_size: number;
 
   @TimestampFieldOptional({ isInThePast: true })

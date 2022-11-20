@@ -18,10 +18,10 @@ import { SharedModule } from './shared/shared.module';
 @Module({
   imports: [
     AuthModule,
-    UserModule,
     ShopeeOauthModule,
     OrderModule,
     ProductModule,
+    UserModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',

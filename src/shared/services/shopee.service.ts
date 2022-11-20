@@ -243,6 +243,7 @@ export class ShopeeService {
       case 'error_param':
       case 'error.param':
       case 'error_param_shop_id_not_found':
+      case 'error_shop_not_found':
         if (requiredParams.some((param) => errorMessage.includes(param))) {
           throw new InternalServerErrorException({
             shopee_error: error,
@@ -259,6 +260,7 @@ export class ShopeeService {
         });
       case 'error_not_found':
       case 'error_item_not_found':
+      case 'product.error_item_not_found':
         throw new NotFoundException({
           shopee_error: error,
           message: 'Request parameter error. Resource not found',
@@ -292,6 +294,14 @@ export class ShopeeService {
           shopee_error: error,
           message: 'Service error on internal Shopee side',
         });
+
+      default:
+        if (errorCode.includes('not_found')) {
+          throw new NotFoundException({
+            shopee_error: error,
+            message: 'Request parameter error. Resource not found',
+          });
+        }
     }
 
     switch (status) {
@@ -310,7 +320,8 @@ export class ShopeeService {
 
     throw new InternalServerErrorException({
       shopee_error: error,
-      message: 'Unknown error when accessing Shopee API',
+      message:
+        'Unknown error when accessing Shopee API. Check the error message',
     });
   }
 }

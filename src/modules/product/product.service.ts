@@ -6,6 +6,8 @@ import type { ItemBaseInfoOptionsDto } from './dtos/item-base-info-options.dto';
 import type { ItemBaseInfoResponseDto } from './dtos/item-base-info-response.dto';
 import type { ItemListOptionsDto } from './dtos/item-list-options.dto';
 import type { ItemListResponseDto } from './dtos/item-list-response.dto';
+import type { ModelListOptionsDto } from './dtos/model-list-options.dto';
+import type { ModelListResponseDto } from './dtos/model-list-response.dto';
 
 @Injectable()
 export class ProductService {
@@ -30,6 +32,19 @@ export class ProductService {
   ): Promise<ItemBaseInfoResponseDto> {
     const response: ItemBaseInfoResponseDto = await this.shopeeService.apiGet(
       'product/get_item_base_info',
+      options,
+    );
+
+    //TODO Add save mechanism
+
+    return response;
+  }
+
+  async getModelList(
+    options: ModelListOptionsDto,
+  ): Promise<ModelListResponseDto> {
+    const response: ModelListResponseDto = await this.shopeeService.apiGet(
+      'product/get_model_list',
       options,
     );
 

@@ -561,6 +561,11 @@
 							"pm.test(\"Response should be exist\", () => {",
 							"    const response = pm.response.json();",
 							"    pm.expect(response.response).to.have.property('order_list')",
+							"    pm.expect(response.response.order_list).to.have.length.greaterThan(0)",
+							"    const order = response.response.order_list[0]",
+							"",
+							"    pm.expect(order.order_sn).to.be.a('string')",
+							"    pm.globals.set('orderSn', order.order_sn)",
 							"});"
 						],
 						"type": "text/javascript"
@@ -592,7 +597,7 @@
 					}
 				},
 				"url": {
-					"raw": "{{baseUrl}}/shopee/order/get_order_list?user_id={{userId}}&time_range_field=create_time&time_from={{pastTimestamp}}&time_to={{$timestamp}}&page_size=10",
+					"raw": "{{baseUrl}}/shopee/order/get_order_list?user_id={{userId}}&time_range_field=create_time&time_from={{pastTimestamp}}&time_to={{currentTimestamp}}&page_size=10",
 					"host": [
 						"{{baseUrl}}"
 					],
@@ -616,7 +621,7 @@
 						},
 						{
 							"key": "time_to",
-							"value": "{{$timestamp}}"
+							"value": "{{currentTimestamp}}"
 						},
 						{
 							"key": "page_size",
@@ -643,7 +648,7 @@
 							"    pm.expect(response.response.order_list).to.have.length.above(0)",
 							"",
 							"    const order = response.response.order_list[0]",
-							"    pm.expect(order.order_sn).to.eq(pm.environment.get('orderSn'))",
+							"    pm.expect(order.order_sn).to.eq(pm.globals.get('orderSn'))",
 							"});",
 							"",
 							"pm.test(\"Line item should be valid\", () => {",
@@ -780,21 +785,13 @@
 							"    pm.response.to.have.status(200);",
 							"});",
 							"",
-							"pm.test(\" detail should be valid\", () => {",
+							"pm.test(\"Item detail should be valid\", () => {",
 							"    const response = pm.response.json();",
-							"    pm.expect(response.response.order_list).to.have.length.above(0)",
+							"    pm.expect(response.response.item).to.have.length.above(0)",
 							"",
-							"    const order = response.response.order_list[0]",
-							"    pm.expect(order.order_sn).to.eq(pm.environment.get('orderSn'))",
-							"});",
-							"",
-							"pm.test(\"Linte item should be valid\", () => {",
-							"    const order = pm.response.json().response.order_list[0]",
-							"    pm.expect(order).to.have.property('item_list')",
-							"    pm.expect(order.item_list).to.have.length.above(0)",
-							"",
-							"    const item = order.item_list[0]",
+							"    const item = response.response.item[0]",
 							"    pm.expect(item.item_id).to.be.a('number')",
+							"    pm.globals.set('itemId', item.item_id)",
 							"});"
 						],
 						"type": "text/javascript"
@@ -817,7 +814,7 @@
 					}
 				},
 				"url": {
-					"raw": "{{baseUrl}}/shopee/product/get_item_list?user_id={{userId}}",
+					"raw": "{{baseUrl}}/shopee/product/get_item_list?user_id={{userId}}&offset=0&page_size=1&item_status=NORMAL&item_status=BANNED",
 					"host": [
 						"{{baseUrl}}"
 					],
@@ -830,6 +827,22 @@
 						{
 							"key": "user_id",
 							"value": "{{userId}}"
+						},
+						{
+							"key": "offset",
+							"value": "0"
+						},
+						{
+							"key": "page_size",
+							"value": "1"
+						},
+						{
+							"key": "item_status",
+							"value": "NORMAL"
+						},
+						{
+							"key": "item_status",
+							"value": "BANNED"
 						}
 					]
 				}
@@ -847,21 +860,14 @@
 							"    pm.response.to.have.status(200);",
 							"});",
 							"",
-							"pm.test(\" detail should be valid\", () => {",
+							"pm.test(\"Item detail should be valid\", () => {",
 							"    const response = pm.response.json();",
-							"    pm.expect(response.response.order_list).to.have.length.above(0)",
+							"    pm.expect(response.response.item_list).to.have.length.above(0)",
 							"",
-							"    const order = response.response.order_list[0]",
-							"    pm.expect(order.order_sn).to.eq(pm.environment.get('orderSn'))",
-							"});",
-							"",
-							"pm.test(\"Linte item should be valid\", () => {",
-							"    const order = pm.response.json().response.order_list[0]",
-							"    pm.expect(order).to.have.property('item_list')",
-							"    pm.expect(order.item_list).to.have.length.above(0)",
-							"",
-							"    const item = order.item_list[0]",
-							"    pm.expect(item.item_id).to.be.a('number')",
+							"    const item = response.response.item_list[0]",
+							"    pm.expect(item.item_id).to.eq(pm.globals.get('itemId'))",
+							"    pm.expect(item.item_name).to.be.a('string')",
+							"    pm.expect(item.category_id).to.be.a('number')",
 							"});"
 						],
 						"type": "text/javascript"
@@ -884,7 +890,7 @@
 					}
 				},
 				"url": {
-					"raw": "{{baseUrl}}/shopee/product/get_item_base_info?user_id={{userId}}",
+					"raw": "{{baseUrl}}/shopee/product/get_item_base_info?user_id={{userId}}&item_id_list={{itemId}}",
 					"host": [
 						"{{baseUrl}}"
 					],
@@ -897,6 +903,10 @@
 						{
 							"key": "user_id",
 							"value": "{{userId}}"
+						},
+						{
+							"key": "item_id_list",
+							"value": "{{itemId}}"
 						}
 					]
 				}
@@ -917,7 +927,7 @@
 							"",
 							"pm.test(\"Error should be not found from Shopee side\", () => {",
 							"    const response = pm.response.json();",
-							"    pm.expect(response.shopee_error.error).to.be.equal('error_not_found')",
+							"    pm.expect(response.shopee_error.error).to.be.equal('product.error_item_not_found')",
 							"});",
 							""
 						],
@@ -941,7 +951,7 @@
 					}
 				},
 				"url": {
-					"raw": "{{baseUrl}}/shopee/product/get_item_base_info?user_id={{userId}}",
+					"raw": "{{baseUrl}}/shopee/product/get_item_base_info?user_id={{userId}}&item_id_list=12345",
 					"host": [
 						"{{baseUrl}}"
 					],
@@ -954,6 +964,10 @@
 						{
 							"key": "user_id",
 							"value": "{{userId}}"
+						},
+						{
+							"key": "item_id_list",
+							"value": "12345"
 						}
 					]
 				}
@@ -971,21 +985,11 @@
 							"    pm.response.to.have.status(200);",
 							"});",
 							"",
-							"pm.test(\" detail should be valid\", () => {",
+							"pm.test(\"Model detail should be valid\", () => {",
 							"    const response = pm.response.json();",
-							"    pm.expect(response.response.order_list).to.have.length.above(0)",
-							"",
-							"    const order = response.response.order_list[0]",
-							"    pm.expect(order.order_sn).to.eq(pm.environment.get('orderSn'))",
-							"});",
-							"",
-							"pm.test(\"Linte item should be valid\", () => {",
-							"    const order = pm.response.json().response.order_list[0]",
-							"    pm.expect(order).to.have.property('item_list')",
-							"    pm.expect(order.item_list).to.have.length.above(0)",
-							"",
-							"    const item = order.item_list[0]",
-							"    pm.expect(item.item_id).to.be.a('number')",
+							"    pm.expect(response.response).to.have.property('model')",
+							"    // pm.expect(response.response.order_list).to.have.length.above(0)",
+							"    // const order = response.response.model[0]",
 							"});"
 						],
 						"type": "text/javascript"
@@ -1008,7 +1012,7 @@
 					}
 				},
 				"url": {
-					"raw": "{{baseUrl}}/shopee/product/get_model_list?user_id={{userId}}",
+					"raw": "{{baseUrl}}/shopee/product/get_model_list?user_id={{userId}}&item_id={{itemId}}",
 					"host": [
 						"{{baseUrl}}"
 					],
@@ -1021,6 +1025,10 @@
 						{
 							"key": "user_id",
 							"value": "{{userId}}"
+						},
+						{
+							"key": "item_id",
+							"value": "{{itemId}}"
 						}
 					]
 				}
@@ -1041,7 +1049,7 @@
 							"",
 							"pm.test(\"Error should be not found from Shopee side\", () => {",
 							"    const response = pm.response.json();",
-							"    pm.expect(response.shopee_error.error).to.be.equal('error_not_found')",
+							"    pm.expect(response.shopee_error.error).to.be.equal('product.error_item_not_found')",
 							"});",
 							""
 						],
@@ -1065,7 +1073,7 @@
 					}
 				},
 				"url": {
-					"raw": "{{baseUrl}}/shopee/product/get_model_list?user_id={{userId}}",
+					"raw": "{{baseUrl}}/shopee/product/get_model_list?user_id={{userId}}&item_id=12345",
 					"host": [
 						"{{baseUrl}}"
 					],
@@ -1078,6 +1086,10 @@
 						{
 							"key": "user_id",
 							"value": "{{userId}}"
+						},
+						{
+							"key": "item_id",
+							"value": "12345"
 						}
 					]
 				}
@@ -1175,8 +1187,11 @@
 			"script": {
 				"type": "text/javascript",
 				"exec": [
-					"const pastTimestamp= Math.floor((Date.now() /1000)) - 14 * 24 * 60 * 60;",
-					"pm.variables.set(\"pastTimestamp\", pastTimestamp)"
+					"const currentTimestamp =  Math.floor(new Date('2022-11-20T00:00:00').getTime() /1000)",
+					"pm.globals.set(\"currentTimestamp\", currentTimestamp)",
+					"",
+					"const pastTimestamp= currentTimestamp - 10 * 24 * 60 * 60;",
+					"pm.globals.set(\"pastTimestamp\", pastTimestamp)"
 				]
 			}
 		},
