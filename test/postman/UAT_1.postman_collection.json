@@ -963,7 +963,7 @@
 					}
 				},
 				"url": {
-					"raw": "{{baseUrl}}/shopee/product/update_stock?user_id={{userId}}&",
+					"raw": "{{baseUrl}}/shopee/product/update_stock?user_id={{userId}}",
 					"host": [
 						"{{baseUrl}}"
 					],
@@ -979,7 +979,65 @@
 						},
 						{
 							"key": "",
-							"value": null
+							"value": null,
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "14A Update Inventory (Async)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Http status should be okay\", () => {",
+							"    pm.response.to.have.status(202);",
+							"});",
+							"",
+							"pm.test(\"Stock detail should be updated\", () => {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response.queue_id).to.be.a('string')",
+							"    pm.expect(response.status).to.eq('PROCESSED')",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"item_id\": {{itemId}},\n    \"stock_list\": [\n        {\n            \"model_id\": 0,\n            \"seller_stock\": [\n                {\n                    \"stock\": 345\n                }\n            ]\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/shopee/product/update_stock?user_id={{userId}}&is_async=true",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"shopee",
+						"product",
+						"update_stock"
+					],
+					"query": [
+						{
+							"key": "user_id",
+							"value": "{{userId}}"
+						},
+						{
+							"key": "is_async",
+							"value": "true"
 						}
 					]
 				}

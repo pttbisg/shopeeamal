@@ -8,10 +8,10 @@ This service is based on [Awesome NestJS Boilerplate v8](README_NEST.md). Typesc
 
 1. Run `yarn` to install all dependencies.
 2. Create new Postgres DB. Alternatively, use `docker-compose up` to create Postgres docker instance with the same configs. Or use existing Postgres DB.
-3. Copy `.env.example` to `.env` and fill it with the correct Postgres and SQS configs.
+3. Copy `.env.example` to `.env` and fill it with the correct Postgres and Redis configs.
 4. Run `yarn migration:run` to do DB migrations.
 5. Run `yarn start:dev` to build the app and run it locally.
-6. Go to [Shopee Console Management](https://open.shopee.com/myconsole/management/app), retrieve the `partner_id` and use this to register new account/account on the this service. See [Authentication](#authentication) section.
+6. Go to [Shopee Console Management](https://open.shopee.com/myconsole/management/app), retrieve the `partner_id` and use this to register new user/account on the this service. See [Authentication](#authentication) section.
 
 
 ## Docs

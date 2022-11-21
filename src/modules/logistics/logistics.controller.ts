@@ -1,3 +1,4 @@
+import { InjectQueue } from '@nestjs/bull';
 import {
   Body,
   Controller,
@@ -13,11 +14,20 @@ import {
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { Queue } from 'bull';
 
-import { QueryOptionsDto } from '../../common/dto/query-options.dto';
+import {
+  AsyncQueryOptionsDto,
+  QueryOptionsDto,
+} from '../../common/dto/query-options.dto';
+import { QueueResponseDto } from '../../common/dto/queue-response.dto';
 import { ShopeeResponseDto } from '../../common/dto/shopee-response.dto';
+import { sendQueue } from '../../common/queue';
 import { RoleType } from '../../constants';
+import { QueueName } from '../../constants/queue';
+import { AuthUser } from '../../decorators';
 import { Auth } from '../../decorators/http.decorators';
+import { UserEntity } from '../../modules/user/user.entity';
 import { CreateShippingDocumentPayloadDto } from './dtos/create-shipping-document-payload.dto';
 import { CreateShippingDocumentResponseDto } from './dtos/create-shipping-document-response.dto';
 import { DownloadShippingDocumentPayloadDto } from './dtos/download-shipping-document-payload.dto';
@@ -34,12 +44,14 @@ import { TrackingInfoOptionsDto } from './dtos/tracking-info-options.dto';
 import { TrackingInfoResponseDto } from './dtos/tracking-info-response.dto';
 import { TrackingNumberResponseDto } from './dtos/tracking-number-response.dto';
 import { LogisticsService } from './logistics.service';
-
 @Controller('shopee/logistics')
 @ApiTags('logistics')
 @Auth(true, [RoleType.USER, RoleType.ADMIN])
 export class LogisticsController {
-  constructor(private logisticsService: LogisticsService) {}
+  constructor(
+    private logisticsService: LogisticsService,
+    @InjectQueue(QueueName.logistics) private queue: Queue,
+  ) {}
 
   @Get('get_tracking_info')
   @HttpCode(HttpStatus.OK)
@@ -80,15 +92,24 @@ export class LogisticsController {
   @Post('ship_order')
   @ApiTags('order')
   @HttpCode(HttpStatus.ACCEPTED)
-  @ApiAcceptedResponse({
+  @ApiOkResponse({
     type: ShopeeResponseDto,
     description: 'Ship Order base on get_shipping_parameter',
   })
+  @ApiAcceptedResponse({
+    type: QueueResponseDto,
+    description: 'Ship Order base on get_shipping_parameter asynchronously',
+  })
   @ApiBody({ type: ShipOrderPayloadDto })
-  shipOrder(
-    @Query() options: QueryOptionsDto,
+  async shipOrder(
+    @AuthUser() user: UserEntity,
+    @Query() options: AsyncQueryOptionsDto,
     @Body() payload: ShipOrderPayloadDto | Map<string, unknown>,
   ): Promise<ShopeeResponseDto> {
+    if (options.is_async) {
+      await sendQueue(this.queue, 'ship_order', user, options, payload);
+    }
+
     return this.logisticsService.shipOrder(
       options,
       payload as ShipOrderPayloadDto,
@@ -134,15 +155,30 @@ export class LogisticsController {
   @Post('create_shipping_document')
   @ApiTags('waybill')
   @HttpCode(HttpStatus.ACCEPTED)
-  @ApiAcceptedResponse({
+  @ApiOkResponse({
     type: CreateShippingDocumentResponseDto,
     description: 'Create Shipping Document Based on Parameter',
   })
+  @ApiAcceptedResponse({
+    type: QueueResponseDto,
+    description: 'Create Shipping Document Based on Parameter asynchronously',
+  })
   @ApiBody({ type: CreateShippingDocumentPayloadDto })
-  createShippingDocument(
-    @Query() options: QueryOptionsDto,
+  async createShippingDocument(
+    @AuthUser() user: UserEntity,
+    @Query() options: AsyncQueryOptionsDto,
     @Body() payload: CreateShippingDocumentPayloadDto | Map<string, unknown>,
   ): Promise<CreateShippingDocumentResponseDto> {
+    if (options.is_async) {
+      await sendQueue(
+        this.queue,
+        'create_shipping_document',
+        user,
+        options,
+        payload,
+      );
+    }
+
     return this.logisticsService.createShippingDocument(
       options,
       payload as CreateShippingDocumentPayloadDto,

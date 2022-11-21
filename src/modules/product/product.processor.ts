@@ -3,11 +3,12 @@ import { Logger } from '@nestjs/common';
 import { Job } from 'bull';
 
 import type { QueryOptionsDto } from '../../common/dto/query-options.dto';
+import { QueueName } from '../../constants/queue';
 import { ShopeeOauthService } from '../../modules/shopee-oauth/shopee-oauth.service';
 import type { UpdateStockPayloadDto } from './dtos/update-stock-payload.dto';
 import { ProductService } from './product.service';
 
-@Processor('product')
+@Processor(QueueName.product)
 export class ProductProcessor {
   private readonly logger = new Logger(ProductProcessor.name);
 
