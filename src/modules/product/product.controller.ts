@@ -1,6 +1,15 @@
-import { Controller, Get, HttpCode, HttpStatus, Query } from '@nestjs/common';
-import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Query,
+} from '@nestjs/common';
+import { ApiBody, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
+import { QueryOptionsDto } from '../../common/dto/query-options.dto';
 import { RoleType } from '../../constants';
 import { Auth } from '../../decorators/http.decorators';
 import { ItemBaseInfoOptionsDto } from './dtos/item-base-info-options.dto';
@@ -9,6 +18,8 @@ import { ItemListOptionsDto } from './dtos/item-list-options.dto';
 import { ItemListResponseDto } from './dtos/item-list-response.dto';
 import { ModelListOptionsDto } from './dtos/model-list-options.dto';
 import { ModelListResponseDto } from './dtos/model-list-response.dto';
+import { UpdateStockPayloadDto } from './dtos/update-stock-payload.dto';
+import { UpdateStockResponseDto } from './dtos/update-stock-response.dto';
 import { ProductService } from './product.service';
 
 @Controller('shopee/product')
@@ -51,5 +62,22 @@ export class ProductController {
     @Query() options: ModelListOptionsDto,
   ): Promise<ModelListResponseDto> {
     return this.productService.getModelList(options);
+  }
+
+  @Post('update_stock')
+  @HttpCode(HttpStatus.ACCEPTED)
+  @ApiOkResponse({
+    type: UpdateStockResponseDto,
+    description: 'Update the Stock of an Item',
+  })
+  @ApiBody({ type: UpdateStockPayloadDto })
+  updateStock(
+    @Query() options: QueryOptionsDto,
+    @Body() payload: UpdateStockPayloadDto | Map<string, unknown>,
+  ): Promise<UpdateStockResponseDto> {
+    return this.productService.updateStock(
+      options,
+      payload as UpdateStockPayloadDto,
+    );
   }
 }

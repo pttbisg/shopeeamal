@@ -297,6 +297,7 @@ export class ShopeeService {
         });
       case 'error_auth':
       case 'error_permission':
+      case 'error_perm_non_admin':
         throw new ShopeeOauthForbiddenException({ shopee_error: error });
       case 'error_sign':
         throw new InternalServerErrorException({
@@ -392,6 +393,19 @@ export class ShopeeService {
       case 'logistics.ship_order_unsupport_pickup':
       case 'logistics.shop_not_support_wms':
       case 'logistics.sls calculate fail':
+      case 'error_stock_less_then_min_limit':
+      case 'error_stock_bigger_then_limit':
+      case 'error_cannt_edit_stock_in_promotion':
+      case 'error_holiday_mode_change_stock':
+      case 'error_promotion_cantnot_update_stock':
+      case 'error_in_item_promotion_nomodel_to_models':
+      case 'error_model_update_stock_model_in_promotion':
+      case 'error_edit_item_stock_for_item_has_model':
+      case 'error_seller_under_penalty':
+      case 'error_nil_shopid_or_itemid':
+      case 'error_item_uneditable':
+      case 'cnsc_shop_block':
+      case 'error_item_not_belong_shop':
         throw new BadRequestException({
           shopee_error: error,
           message: 'Request parameter error. See shopee_error for the details',
@@ -413,6 +427,9 @@ export class ShopeeService {
       case 'logistics.error_too_many_invoke_function':
       case 'logistics.error_unknown':
       case 'logistics.logistic_order_is_locked_on_creating':
+      case 'error_busi_update_stock_failed':
+      case 'error_busi_cannot_edit_vsku':
+      case 'error_wms_shop_block_upate_stock':
         throw new ServiceUnavailableException({
           shopee_error: error,
           message: 'Service error on internal Shopee side',

@@ -7,13 +7,20 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiAcceptedResponse,
+  ApiBody,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
 import { QueryOptionsDto } from '../../common/dto/query-options.dto';
 import { ShopeeResponseDto } from '../../common/dto/shopee-response.dto';
 import { RoleType } from '../../constants';
 import { Auth } from '../../decorators/http.decorators';
-import type { ShipOrderPayloadDto } from './dtos/ship-order-payload.dto';
+import { ShipOrderPayloadDto } from './dtos/ship-order-payload.dto';
+import { ShippingDocumentPayloadDto } from './dtos/shipping-document-payload.dto';
+import { ShippingDocumentResponseDto } from './dtos/shipping-document-response.dto';
 import { ShippingParameterOptionsDto } from './dtos/shipping-parameter-options.dto';
 import { ShippingParameterResponseDto } from './dtos/shipping-parameter-response.dto';
 import { TrackingInfoOptionsDto } from './dtos/tracking-info-options.dto';
@@ -65,10 +72,11 @@ export class LogisticsController {
 
   @Post('ship_order')
   @HttpCode(HttpStatus.ACCEPTED)
-  @ApiOkResponse({
+  @ApiAcceptedResponse({
     type: ShopeeResponseDto,
     description: 'Ship Order base on get_shipping_parameter',
   })
+  @ApiBody({ type: ShipOrderPayloadDto })
   shipOrder(
     @Query() options: QueryOptionsDto,
     @Body() payload: ShipOrderPayloadDto | Map<string, unknown>,
@@ -76,6 +84,23 @@ export class LogisticsController {
     return this.logisticsService.shipOrder(
       options,
       payload as ShipOrderPayloadDto,
+    );
+  }
+
+  @Post('get_shipping_document_data_info')
+  @HttpCode(HttpStatus.ACCEPTED)
+  @ApiAcceptedResponse({
+    type: ShippingDocumentResponseDto,
+    description: 'Get Shipping Data Info for an Order',
+  })
+  @ApiBody({ type: ShippingDocumentPayloadDto })
+  getShippingDocumentDataInfo(
+    @Query() options: QueryOptionsDto,
+    @Body() payload: ShippingDocumentPayloadDto | Map<string, unknown>,
+  ): Promise<ShippingDocumentResponseDto> {
+    return this.logisticsService.getShippingDocumentDataInfo(
+      options,
+      payload as ShippingDocumentPayloadDto,
     );
   }
 }

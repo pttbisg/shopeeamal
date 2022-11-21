@@ -379,175 +379,6 @@
 			"response": []
 		},
 		{
-			"name": "5A Get Tracking Number",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Http status should be okay\", () => {",
-							"    pm.response.to.have.status(202);",
-							"});",
-							"",
-							"pm.test(\"Tracking exist\", () => {",
-							"    const response = pm.response.json();",
-							"    pm.expect(response.refresh_token).to.be.a('string')",
-							"    pm.expect(response.access_token).to.be.a('string')",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{baseUrl}}/shopee/logistics/get_tracking_number?user_id={{userId}}",
-					"host": [
-						"{{baseUrl}}"
-					],
-					"path": [
-						"shopee",
-						"logistics",
-						"get_tracking_number"
-					],
-					"query": [
-						{
-							"key": "user_id",
-							"value": "{{userId}}"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "5B Get Waybill",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Http status should be okay\", () => {",
-							"    pm.response.to.have.status(202);",
-							"});",
-							"",
-							"pm.test(\"Waybill exist\", () => {",
-							"    const response = pm.response.json();",
-							"    pm.expect(response.refresh_token).to.be.a('string')",
-							"    pm.expect(response.access_token).to.be.a('string')",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{baseUrl}}/shopee/first_mile/get_waybill?user_id={{userId}}",
-					"host": [
-						"{{baseUrl}}"
-					],
-					"path": [
-						"shopee",
-						"first_mile",
-						"get_waybill"
-					],
-					"query": [
-						{
-							"key": "user_id",
-							"value": "{{userId}}"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "5C Get Waybill (Invalid)",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Http status should be not found\", () => {",
-							"    pm.response.to.have.status(404);",
-							"});",
-							"",
-							"",
-							"pm.test(\"Error should be not found from Shopee side\", () => {",
-							"    const response = pm.response.json();",
-							"    pm.expect(response.shopee_error.error).to.be.equal('error_not_found')",
-							"});",
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{baseUrl}}/shopee/first_mile/get_waybill?user_id={{userId}}",
-					"host": [
-						"{{baseUrl}}"
-					],
-					"path": [
-						"shopee",
-						"first_mile",
-						"get_waybill"
-					],
-					"query": [
-						{
-							"key": "user_id",
-							"value": "{{userId}}"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "6 Get Order List",
 			"event": [
 				{
@@ -1104,24 +935,15 @@
 					"script": {
 						"exec": [
 							"pm.test(\"Http status should be okay\", () => {",
-							"    pm.response.to.have.status(200);",
+							"    pm.response.to.have.status(202);",
 							"});",
 							"",
-							"pm.test(\" detail should be valid\", () => {",
+							"pm.test(\"Stock detail should be updated\", () => {",
 							"    const response = pm.response.json();",
-							"    pm.expect(response.response.order_list).to.have.length.above(0)",
+							"    pm.expect(response.response.success_list).to.have.length.above(0)",
 							"",
-							"    const order = response.response.order_list[0]",
-							"    pm.expect(order.order_sn).to.eq(pm.environment.get('orderSn'))",
-							"});",
-							"",
-							"pm.test(\"Linte item should be valid\", () => {",
-							"    const order = pm.response.json().response.order_list[0]",
-							"    pm.expect(order).to.have.property('item_list')",
-							"    pm.expect(order.item_list).to.have.length.above(0)",
-							"",
-							"    const item = order.item_list[0]",
-							"    pm.expect(item.item_id).to.be.a('number')",
+							"    const success = response.response.success_list[0]",
+							"    pm.expect(success.stock).to.eq(345)",
 							"});"
 						],
 						"type": "text/javascript"
@@ -1133,7 +955,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "",
+					"raw": "{\n    \"item_id\": {{itemId}},\n    \"stock_list\": [\n        {\n            \"model_id\": 0,\n            \"seller_stock\": [\n                {\n                    \"stock\": 345\n                }\n            ]\n        }\n    ]\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -1141,7 +963,7 @@
 					}
 				},
 				"url": {
-					"raw": "{{baseUrl}}/shopee/product/update_stock?user_id={{userId}}",
+					"raw": "{{baseUrl}}/shopee/product/update_stock?user_id={{userId}}&",
 					"host": [
 						"{{baseUrl}}"
 					],
@@ -1154,6 +976,185 @@
 						{
 							"key": "user_id",
 							"value": "{{userId}}"
+						},
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "5A Get Shipping Parameter",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Http status should be okay\", () => {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Tracking exist\", () => {",
+							"    const response = pm.response.json();",
+							"    // pm.expect(response.response.order_sn).to.eq(pm.globals.get('orderSn'))",
+							"",
+							"    // pm.expect(response.response.tracking_info).to.have.length.above(0)",
+							"    // const tracking = response.response.tracking_infi[0]",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/shopee/logistics/get_shipping_parameter?user_id={{userId}}&order_sn={{orderSn}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"shopee",
+						"logistics",
+						"get_shipping_parameter"
+					],
+					"query": [
+						{
+							"key": "user_id",
+							"value": "{{userId}}"
+						},
+						{
+							"key": "order_sn",
+							"value": "{{orderSn}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "5B Get Waybill",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Http status should be okay\", () => {",
+							"    pm.response.to.have.status(202);",
+							"});",
+							"",
+							"pm.test(\"Waybill exist\", () => {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response.refresh_token).to.be.a('string')",
+							"    pm.expect(response.access_token).to.be.a('string')",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"order_sn\": \"{{orderSn}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/shopee/logistics/get_shipping_document_data_info?user_id={{userId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"shopee",
+						"logistics",
+						"get_shipping_document_data_info"
+					],
+					"query": [
+						{
+							"key": "user_id",
+							"value": "{{userId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "5C Get Waybill (Invalid)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Http status should be not found\", () => {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Error should be not found from Shopee side\", () => {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response.shopee_error.error).to.be.equal('error_not_found')",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"order_sn\": \"invalidOrder\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/shopee/logistics/get_shipping_document_data_info?user_id={{userId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"shopee",
+						"logistics",
+						"get_shipping_document_data_info"
+					],
+					"query": [
+						{
+							"key": "user_id",
+							"value": "{{userId}}"
+						},
+						{
+							"key": "",
+							"value": null,
+							"disabled": true
 						}
 					]
 				}
@@ -1187,7 +1188,7 @@
 			"script": {
 				"type": "text/javascript",
 				"exec": [
-					"const currentTimestamp =  Math.floor(new Date('2022-11-20T00:00:00').getTime() /1000)",
+					"const currentTimestamp =  Math.floor(new Date('2022-11-21T00:40:00').getTime() /1000)",
 					"pm.globals.set(\"currentTimestamp\", currentTimestamp)",
 					"",
 					"const pastTimestamp= currentTimestamp - 10 * 24 * 60 * 60;",

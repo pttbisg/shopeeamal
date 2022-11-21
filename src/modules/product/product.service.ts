@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import type { QueryOptionsDto } from 'common/dto/query-options.dto';
 
 import { ShopeeService } from '../../shared/services/shopee.service';
 import { ValidatorService } from '../../shared/services/validator.service';
@@ -8,6 +9,8 @@ import type { ItemListOptionsDto } from './dtos/item-list-options.dto';
 import type { ItemListResponseDto } from './dtos/item-list-response.dto';
 import type { ModelListOptionsDto } from './dtos/model-list-options.dto';
 import type { ModelListResponseDto } from './dtos/model-list-response.dto';
+import type { UpdateStockPayloadDto } from './dtos/update-stock-payload.dto';
+import type { UpdateStockResponseDto } from './dtos/update-stock-response.dto';
 
 @Injectable()
 export class ProductService {
@@ -49,6 +52,20 @@ export class ProductService {
     );
 
     //TODO Add save mechanism
+
+    return response;
+  }
+
+  //TODO Make it on queue
+  async updateStock(
+    options: QueryOptionsDto,
+    payload: UpdateStockPayloadDto,
+  ): Promise<UpdateStockResponseDto> {
+    const response: UpdateStockResponseDto = await this.shopeeService.apiPost(
+      'product/update_stock',
+      payload,
+      options,
+    );
 
     return response;
   }

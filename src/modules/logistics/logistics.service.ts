@@ -5,6 +5,8 @@ import type { ShopeeResponseDto } from '../../common/dto/shopee-response.dto';
 import { ShopeeService } from '../../shared/services/shopee.service';
 import { ValidatorService } from '../../shared/services/validator.service';
 import type { ShipOrderPayloadDto } from './dtos/ship-order-payload.dto';
+import type { ShippingDocumentPayloadDto } from './dtos/shipping-document-payload.dto';
+import type { ShippingDocumentResponseDto } from './dtos/shipping-document-response.dto';
 import type { ShippingParameterOptionsDto } from './dtos/shipping-parameter-options.dto';
 import type { ShippingParameterResponseDto } from './dtos/shipping-parameter-response.dto';
 import type { TrackingInfoOptionsDto } from './dtos/tracking-info-options.dto';
@@ -62,6 +64,20 @@ export class LogisticsService {
       payload,
       options,
     );
+
+    return response;
+  }
+
+  async getShippingDocumentDataInfo(
+    options: QueryOptionsDto,
+    payload: ShippingDocumentPayloadDto,
+  ): Promise<ShippingDocumentResponseDto> {
+    const response: ShippingDocumentResponseDto =
+      await this.shopeeService.apiPost(
+        'logistics/get_shipping_document_data_info',
+        payload,
+        options,
+      );
 
     return response;
   }
