@@ -16,6 +16,10 @@ This service is based on [Awesome NestJS Boilerplate v8](README_NEST.md). Typesc
 
 ## Docs
 
+### Design Docs
+
+See the [Google Docs](https://docs.google.com/document/d/1sr6SIa7CNM-e3JzRncOtg37FBLvATbuk_2XQQ9JuiNw/edit?usp=sharing)
+
 ### HTTP API
 
 API Reference can be accessed at [pttb-chat.stoplight.io](https://pttb-chat.stoplight.io/) or go to `/docs/swagger.json` and import that file to Postman/Swagger/any API Docs app to see it. This API docs may be not up to date if you develop new endpoint.
@@ -48,6 +52,11 @@ The Shopee Oauth is handled by this service. The only flow that client needed ar
 2. Let the end user login and authorize their Shopee account to our service. Note: For now, the client not get the notification whether it is successful or not.
 3. Call other API and provide the same `user_id`. Now you can access our user Shopee data. If you get `401` error, check the error message. If the problem is related to Shopee Oauth, do step 1 again and let the user reauthenticate. This may happens if user fails to do the OAuth or we never accessing the user acount more than 30 days. To prevent the later problem, for now, you can schedule any API call to this service for that user so it never expires.
 
+### Proxy
+
+This service also provide simple proxy to Shopee API with the Oauth already handled. See the docs for `/proxy/*` endpoint to be more details.
+
+Any request to that endpoint will be proxied to Shopee API with all parametes, payload, and authentication but no validation, db recording, or queue mechanism. Calling `{serviceUrl}/proxy/order/get_order_list?...` is the proxy version of `{serviceUrl}/shopee/order/get_order_list?...` which in turn will call equivalent Shopee API at `{ShopeeUrl}/api/v2/order/get_order_list?...`.
 
 ### Client Guide
 
@@ -59,7 +68,7 @@ This is example to send a message and receive the ack.
 ```javascript
     data = {
         status: "ACCEPTED",
-        message,
+        order,
     };
 
     const options = {

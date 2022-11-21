@@ -1,9 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { ShopeeService } from '../../shared/services/shopee.service';
-import { ValidatorService } from '../../shared/services/validator.service';
 import type { OrderDetailOptionsDto } from './dtos/order-detail-options.dto';
 import type { OrderDetailResponseDto } from './dtos/order-detail-response.dto';
 import type { OrderListOptionsDto } from './dtos/order-list-options.dto';
@@ -13,12 +12,13 @@ import { OrderEntity } from './order.entity';
 
 @Injectable()
 export class OrderService {
+  private readonly logger = new Logger(OrderService.name);
+
   constructor(
     @InjectRepository(OrderEntity)
     private orderRepository: Repository<OrderEntity>,
 
     private shopeeService: ShopeeService,
-    private validatorService: ValidatorService,
   ) {}
 
   async getOrderList(
@@ -29,9 +29,27 @@ export class OrderService {
       options,
     );
 
-    //TODO Add save mechanism
+    try {
+      await this.upsertOrders(response);
+    } catch (error) {
+      this.logger.error(error);
+    }
 
     return response;
+  }
+
+  async upsertOrders(
+    response: OrderListResponseDto | OrderDetailResponseDto,
+    saveRaw = false,
+  ) {
+    const orders = response.response.order_list.map((order) => ({
+      shop_id: this.shopeeService.oauth.shopId,
+      raw: saveRaw ? order : undefined,
+      updatedAt: new Date(), // Bug on Typeorm Upsert
+      ...order,
+    }));
+
+    await this.orderRepository.upsert(orders, ['order_sn']);
   }
 
   async getOrderDetail(
@@ -42,7 +60,11 @@ export class OrderService {
       options,
     );
 
-    //TODO Add save mechanism
+    try {
+      await this.upsertOrders(response, true);
+    } catch (error) {
+      this.logger.error(error);
+    }
 
     return response;
   }

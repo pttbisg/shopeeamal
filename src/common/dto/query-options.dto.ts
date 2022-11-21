@@ -1,4 +1,8 @@
-import { PositiveIntegerFieldOptional, StringField } from '../../decorators';
+import {
+  BooleanFieldOptional,
+  PositiveIntegerFieldOptional,
+  StringField,
+} from '../../decorators';
 
 export class QueryOptionsDto {
   @StringField({
@@ -13,4 +17,12 @@ export class QueryOptionsDto {
     example: undefined, //force blank
   })
   readonly shop_id?: number;
+}
+export class AsyncQueryOptionsDto extends QueryOptionsDto {
+  @BooleanFieldOptional({
+    description:
+      'Set true to make this method run asynchronously by queueing the command instead of calling Shopee API directly',
+    default: false,
+  })
+  is_async? = false;
 }

@@ -9,14 +9,19 @@ export function setupSwagger(app: INestApplication): void {
     .setDescription(
       `## Shopee API
         All endpoints under \`/shopee/\` will point to Shopee API with similar request/response format.
-         See (Shopee API Reference)[https://open.shopee.com/documents/v2/v2.product.get_category?module=89&type=1] for more details.
-         The difference is client doesn't need to handle \`partner_id, access_token, shop_id, sign, and timestamp\`.
-         Only \`user_id\` that parameter need to be provided.
+        See (Shopee API Reference)[https://open.shopee.com/documents/v2/v2.product.get_category?module=89&type=1] for more details.
+        The difference is client doesn't need to handle \`partner_id, access_token, shop_id, sign, and timestamp\`.
+        Only \`user_id\` that parameter need to be provided.
 
       ## Authentication
       1. All API endpoint is behind \`X-API-KEY\` authentication in headers.
       2. Go to \`/shopee/auth/get_auth_url\` and let the user authorize their Shopee account.
       3. Go to any endpoints in this API with that same \`user_id\`. The Shopee Auth will be handled.
+
+      ## Proxy
+      If you want simple proxy to Shopee. Use \`/proxy/*\` endpoint instead. This will handle the neccessary Oauth.
+      But there is no validation/save/queue logic applied to it.
+
 
       ### REST
 

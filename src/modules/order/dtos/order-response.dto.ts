@@ -31,13 +31,10 @@ export enum OrderStatus {
 
 export class OrderResponse {
   @StringField()
-  order_sn: boolean;
+  order_sn: string;
 
   @EnumFieldOptional(() => OrderStatus)
-  order_status?: OrderStatus | string;
-
-  @StringFieldOptional()
-  order_internal_id?: string;
+  order_status?: OrderStatus;
 }
 
 export class OrderFullResponse extends OrderResponse {
@@ -54,7 +51,7 @@ export class OrderFullResponse extends OrderResponse {
   total_amount?: number;
 
   @EnumField(() => OrderStatus)
-  order_status: string;
+  order_status: OrderStatus;
 
   @StringFieldOptional()
   shipping_carrier?: string;
