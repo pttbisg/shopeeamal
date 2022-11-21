@@ -1,3 +1,6 @@
+import { createBullBoard } from '@bull-board/api';
+import { BullAdapter } from '@bull-board/api/bullAdapter';
+import { ExpressAdapter as BullExpressAdapter } from '@bull-board/express';
 import {
   ClassSerializerInterceptor,
   HttpStatus,
@@ -8,7 +11,9 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { Transport } from '@nestjs/microservices';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { ExpressAdapter } from '@nestjs/platform-express';
+import type { Queue } from 'bull';
 import compression from 'compression';
+import expressBasicAuth from 'express-basic-auth';
 import { middleware as expressCtx } from 'express-ctx';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
@@ -19,6 +24,7 @@ import {
 } from 'typeorm-transactional-cls-hooked';
 
 import { AppModule } from './app.module';
+import { QueueName } from './constants/queue';
 import { AuthFailedFilter } from './filters/auth-failed.filter';
 import { HttpExceptionFilter } from './filters/bad-request.filter';
 import { QueryFailedFilter } from './filters/query-failed.filter';
@@ -96,6 +102,31 @@ export async function bootstrap(): Promise<NestExpressApplication> {
 
   if (configService.documentationEnabled) {
     setupSwagger(app);
+  }
+
+  if (configService.adminQueueEnabled) {
+    const bullServerAdapter = new BullExpressAdapter();
+    createBullBoard({
+      queues: Object.values(QueueName).map(
+        (name) => new BullAdapter(app.get<Queue>(`BullQueue_${name}`)),
+      ),
+      serverAdapter: bullServerAdapter,
+    });
+
+    bullServerAdapter.setBasePath('/admin/queues');
+
+    const config = configService.adminQueueConfig;
+
+    app.use(
+      '/admin/queues',
+      expressBasicAuth({
+        users: {
+          [config.username]: config.password,
+        },
+        challenge: true,
+      }),
+      bullServerAdapter.getRouter(),
+    );
   }
 
   app.use(expressCtx);

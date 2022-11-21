@@ -58,6 +58,15 @@ This service also provide simple proxy to Shopee API with the Oauth already hand
 
 Any request to that endpoint will be proxied to Shopee API with all parametes, payload, and authentication but no validation, db recording, or queue mechanism. Calling `{serviceUrl}/proxy/order/get_order_list?...` is the proxy version of `{serviceUrl}/shopee/order/get_order_list?...` which in turn will call equivalent Shopee API at `{ShopeeUrl}/api/v2/order/get_order_list?...`.
 
+
+### DB 
+On some `GET` API, getting either the list of resources or the resource detail will save the copy of the data on DB. There is no API to get this copy of the data and must be accessed directly to DB.
+
+### Queue
+On some `POST` API, if the `is_async` parameter is set to `true`, the request will be put on the queue instead of calling Shopee API directly. The queue is implemented using [Bull](https://github.com/OptimalBits/bull) and Redis as the messaging storage. If the task is failed, the queue will be automatically retried using exponential backoff. The last attempt will be around ~12 hours after the task is created.
+
+To monitor the queue and retry it manually, go to the [{{url}}/admin/queues](http://localhost:3000/admin/queues) dashboard with the username and password according to `.env` config.
+
 ### Client Guide
 
 #### HTTP API

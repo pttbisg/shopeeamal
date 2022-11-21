@@ -21,8 +21,8 @@ export class ApiConfigService {
     return this.nodeEnv === 'test';
   }
 
-  private getNumber(key: string): number {
-    const value = this.get(key);
+  private getNumber(key: string, defaultValue?: number): number {
+    const value = this.get(key, `${defaultValue}`);
 
     try {
       return Number(value);
@@ -31,8 +31,12 @@ export class ApiConfigService {
     }
   }
 
-  private getBoolean(key: string): boolean {
-    const value = this.get(key);
+  private getBoolean(key: string, defaultValue?: boolean): boolean {
+    const booleanValue = defaultValue === true ? 'true' : 'false';
+    const value = this.get(
+      key,
+      defaultValue !== undefined ? booleanValue : undefined,
+    );
 
     try {
       return Boolean(JSON.parse(value));
@@ -75,7 +79,7 @@ export class ApiConfigService {
     return {
       redis: {
         host: this.getString('REDIS_HOST', 'localhost'),
-        port: this.getString('REDIS_PORT', '6379'),
+        port: this.getNumber('REDIS_PORT', 6379),
       },
     };
   }
@@ -152,6 +156,17 @@ export class ApiConfigService {
     return {
       host: this.getString('NATS_HOST'),
       port: this.getNumber('NATS_PORT'),
+    };
+  }
+
+  get adminQueueEnabled(): boolean {
+    return this.getBoolean('ADMIN_QUEUE_ENABLED', false);
+  }
+
+  get adminQueueConfig() {
+    return {
+      username: this.getString('ADMIN_QUEUE_USERNAME'),
+      password: this.getString('ADMIN_QUEUE_PASSWORD'),
     };
   }
 

@@ -15,12 +15,22 @@ export async function sendQueue(
     queue_id: uuid(),
     status: QueueStatus.PROCESSED,
   };
-  await queue.add(name, {
-    ...message,
-    user,
-    query,
-    payload,
-  });
+  await queue.add(
+    name,
+    {
+      ...message,
+      user,
+      query,
+      payload,
+    },
+    {
+      attempts: 14,
+      backoff: {
+        type: 'exponential',
+        delay: 4000, // 4, 8, 16, 32, 1 min, 2 min, 4 min, 8 min, 16 min, 32 min, 1 hour, 2 hour, 4 hour, 8 hour
+      },
+    },
+  );
 
   return message;
 }

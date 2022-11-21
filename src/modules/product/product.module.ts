@@ -2,6 +2,7 @@ import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { QueueName } from '../../constants/queue';
 import { ItemEntity } from './item.entity';
 import { ProductController } from './product.controller';
 import { ProductProcessor } from './product.processor';
@@ -13,7 +14,7 @@ export const handlers = [];
   imports: [
     TypeOrmModule.forFeature([ItemEntity]),
     BullModule.registerQueue({
-      name: 'product',
+      name: QueueName.product,
     }),
   ],
   providers: [ProductService, ProductProcessor, ...handlers],

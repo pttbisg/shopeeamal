@@ -20,6 +20,7 @@ import { AsyncQueryOptionsDto } from '../../common/dto/query-options.dto';
 import { QueueResponseDto } from '../../common/dto/queue-response.dto';
 import { sendQueue } from '../../common/queue';
 import { RoleType } from '../../constants';
+import { QueueName } from '../../constants/queue';
 import { AuthUser } from '../../decorators';
 import { Auth } from '../../decorators/http.decorators';
 import { UserEntity } from '../../modules/user/user.entity';
@@ -39,7 +40,7 @@ import { ProductService } from './product.service';
 export class ProductController {
   constructor(
     private productService: ProductService,
-    @InjectQueue('product') private queue: Queue,
+    @InjectQueue(QueueName.product) private queue: Queue,
   ) {}
 
   @Get('get_item_list')
