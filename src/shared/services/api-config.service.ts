@@ -41,8 +41,8 @@ export class ApiConfigService {
     }
   }
 
-  private getString(key: string): string {
-    const value = this.get(key);
+  private getString(key: string, defaultValue?: string): string {
+    const value = this.get(key, defaultValue);
 
     return value.replace(/\\n/g, '\n');
   }
@@ -69,6 +69,15 @@ export class ApiConfigService {
 
   get fallbackLanguage(): string {
     return this.getString('FALLBACK_LANGUAGE');
+  }
+
+  get redisConfig() {
+    return {
+      redis: {
+        host: this.getString('REDIS_HOST', 'localhost'),
+        port: this.getString('REDIS_PORT', '6379'),
+      },
+    };
   }
 
   get postgresConfig(): TypeOrmModuleOptions {
@@ -160,10 +169,14 @@ export class ApiConfigService {
     };
   }
 
-  private get(key: string): string {
+  private get(key: string, defaultValue?: string): string {
     const value = this.configService.get<string>(key);
 
     if (isNil(value)) {
+      if (defaultValue) {
+        return defaultValue;
+      }
+
       throw new Error(key + ' environment variable does not set'); // probably we should call process.exit() too to avoid locking the service
     }
 

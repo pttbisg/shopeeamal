@@ -1,3 +1,4 @@
+import { InjectQueue } from '@nestjs/bull';
 import {
   Body,
   Controller,
@@ -7,11 +8,21 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ApiBody, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiAcceptedResponse,
+  ApiBody,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { Queue } from 'bull';
 
-import { QueryOptionsDto } from '../../common/dto/query-options.dto';
+import { AsyncQueryOptionsDto } from '../../common/dto/query-options.dto';
+import { QueueResponseDto } from '../../common/dto/queue-response.dto';
+import { sendQueue } from '../../common/queue';
 import { RoleType } from '../../constants';
+import { AuthUser } from '../../decorators';
 import { Auth } from '../../decorators/http.decorators';
+import { UserEntity } from '../../modules/user/user.entity';
 import { ItemBaseInfoOptionsDto } from './dtos/item-base-info-options.dto';
 import { ItemBaseInfoResponseDto } from './dtos/item-base-info-response.dto';
 import { ItemListOptionsDto } from './dtos/item-list-options.dto';
@@ -26,7 +37,10 @@ import { ProductService } from './product.service';
 @ApiTags('product', 'sku')
 @Auth(true, [RoleType.USER, RoleType.ADMIN])
 export class ProductController {
-  constructor(private productService: ProductService) {}
+  constructor(
+    private productService: ProductService,
+    @InjectQueue('product') private queue: Queue,
+  ) {}
 
   @Get('get_item_list')
   @HttpCode(HttpStatus.OK)
@@ -71,11 +85,20 @@ export class ProductController {
     type: UpdateStockResponseDto,
     description: 'Update the Stock of an Item',
   })
+  @ApiAcceptedResponse({
+    type: QueueResponseDto,
+    description: 'Update the Stock of an Item asynchronously',
+  })
   @ApiBody({ type: UpdateStockPayloadDto })
   updateStock(
-    @Query() options: QueryOptionsDto,
+    @AuthUser() user: UserEntity,
+    @Query() options: AsyncQueryOptionsDto,
     @Body() payload: UpdateStockPayloadDto | Map<string, unknown>,
-  ): Promise<UpdateStockResponseDto> {
+  ): Promise<UpdateStockResponseDto | QueueResponseDto> {
+    if (options.is_async === true) {
+      return sendQueue(this.queue, 'update_stock', user, options, payload);
+    }
+
     return this.productService.updateStock(
       options,
       payload as UpdateStockPayloadDto,

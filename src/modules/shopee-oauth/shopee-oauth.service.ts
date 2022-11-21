@@ -1,10 +1,21 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  HttpException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { QueryOptionsDto } from 'common/dto/query-options.dto';
 import { IsNull, Not, Repository } from 'typeorm';
 import { Transactional } from 'typeorm-transactional-cls-hooked';
 
 import { ShopeeOauthStatus } from '../../constants';
+import {
+  ShopeeOauthForbiddenException,
+  ShopeeOauthUnathorizedException,
+} from '../../exceptions/shopee-oauth.exception';
 import { UserEntity } from '../../modules/user/user.entity';
 import { ApiConfigService } from '../../shared/services/api-config.service';
 import { ShopeeService } from '../../shared/services/shopee.service';
@@ -16,6 +27,12 @@ import { OauthUrlOptionsDto } from './dtos/oauth-url-options.dto';
 import { ShopeeOauthDto } from './dtos/shopee-oauth.dto';
 import { ShopeeOauthNotFoundException } from './exceptions/shopee-oauth-not-found.exception';
 import { ShopeeOauthEntity } from './shopee-oauth.entity';
+
+export interface IShopeeOauthRequest {
+  user: UserEntity;
+  query?;
+  shopeeOauth?: ShopeeOauthEntity;
+}
 
 @Injectable()
 export class ShopeeOauthService {
@@ -221,6 +238,75 @@ export class ShopeeOauthService {
     oauth.shopIds ??= response.shop_id_list;
 
     return oauth;
+  }
+
+  async canActivate(request: IShopeeOauthRequest) {
+    const user: UserEntity = request.user;
+    const partnerId = user.partnerId;
+    const userId: string = request.query?.user_id;
+    this.shopeeService.user = user;
+
+    if (!userId) {
+      throw new ShopeeOauthUnathorizedException(
+        'Unauthorized access to this API. user_id must be provided to determine Shopee Oauth',
+      );
+    }
+
+    const oauth = await this.getAuthorizedOauth(
+      partnerId,
+      userId,
+      request.query?.shop_id as number,
+    );
+
+    if (!oauth) {
+      throw new ShopeeOauthUnathorizedException(
+        'Oauth is not authorized. Request the access/refresh token first',
+      );
+    }
+
+    if (oauth.isRefreshTokenExpired) {
+      throw new ShopeeOauthUnathorizedException(
+        'Refresh Token is expired. Ask the user to reauthorize this service to their Shopee account',
+      );
+    }
+
+    request.shopeeOauth = oauth;
+
+    if (oauth.isAccessTokenExpired) {
+      try {
+        this.shopeeService.oauth = oauth;
+        const { oauth: updatedOauth } = await this.refreshToken(oauth);
+        request.shopeeOauth = updatedOauth;
+      } catch (error) {
+        if (error instanceof ServiceUnavailableException) {
+          throw new ServiceUnavailableException({
+            message: 'Error on Shopee side when refreshing access token',
+            error: error.getResponse(),
+          });
+        } else if (
+          error instanceof ShopeeOauthUnathorizedException ||
+          error instanceof ShopeeOauthForbiddenException
+        ) {
+          throw new ShopeeOauthUnathorizedException({
+            message:
+              'Unauthorized access on Shopee side when refreshing access token. ' +
+              'Try to ask the user to reauthorize this service to their Shopee account',
+            error: error.getResponse(),
+          });
+        } else if (error instanceof HttpException) {
+          throw new InternalServerErrorException({
+            message: 'Internal error when refreshing access token',
+            error: error.getResponse(),
+          });
+        }
+
+        throw error;
+      }
+    }
+
+    this.shopeeService.oauth = request.shopeeOauth;
+
+    return true;
   }
 
   @Transactional()

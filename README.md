@@ -2,7 +2,7 @@
 
 Service that handle the integration between Frontend/Backend and Shopee.
 
-This service is based on [Awesome NestJS Boilerplate v8](README_NEST.md). Typescript is the main programming language and NestJS is the framework. This service depends on Shopee API to work. PostgreSQL is used as database. SQS is used for messaging service.
+This service is based on [Awesome NestJS Boilerplate v8](README_NEST.md). Typescript is the main programming language and [NestJS](https://github.com/nestjs/nest) is the framework. This service depends on [Shopee API](https://open.shopee.com/documents/v2/v2.product.get_category?module=89&type=1) to work. PostgreSQL is used as database. Redis is used for queueing/messaging purpose, implemented using (Bull)[https://github.com/OptimalBits/bull] that does integrate with Nest.
 
 ## Setup
 

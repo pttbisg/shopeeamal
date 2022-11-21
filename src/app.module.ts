@@ -1,5 +1,6 @@
 import './boilerplate.polyfill';
 
+import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -34,6 +35,12 @@ import { SharedModule } from './shared/shared.module';
       imports: [SharedModule],
       useFactory: (configService: ApiConfigService) =>
         configService.postgresConfig,
+      inject: [ApiConfigService],
+    }),
+    BullModule.forRootAsync({
+      imports: [SharedModule],
+      useFactory: (configService: ApiConfigService) =>
+        configService.redisConfig,
       inject: [ApiConfigService],
     }),
     I18nModule.forRootAsync({
