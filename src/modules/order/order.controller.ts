@@ -10,7 +10,7 @@ import { OrderListResponseDto } from './dtos/order-list-response.dto';
 import { OrderService } from './order.service';
 
 @Controller('shopee/order')
-@ApiTags('order', 'shopee')
+@ApiTags('order')
 @Auth(true, [RoleType.USER, RoleType.ADMIN])
 export class OrderController {
   constructor(private orderService: OrderService) {}

@@ -26,5 +26,5 @@ export class ShopeeGetResponseDto<
   response: T;
 
   @StringFieldOptional({ isArray: true })
-  warning?: string[] | string;
+  warning?: string[] | string | ObjectResponse[];
 }

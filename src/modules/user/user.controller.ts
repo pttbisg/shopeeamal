@@ -19,7 +19,7 @@ import { UsersPageOptionsDto } from './dtos/users-page-options.dto';
 import { UserService } from './user.service';
 
 @Controller('users')
-@ApiTags('users')
+@ApiTags('auth')
 @Auth(false, [RoleType.ADMIN])
 @ApiDefaultResponse({
   type: StandardErrorDto,

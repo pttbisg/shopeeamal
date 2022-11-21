@@ -23,7 +23,7 @@ import { UpdateStockResponseDto } from './dtos/update-stock-response.dto';
 import { ProductService } from './product.service';
 
 @Controller('shopee/product')
-@ApiTags('product', 'shopee')
+@ApiTags('product', 'sku')
 @Auth(true, [RoleType.USER, RoleType.ADMIN])
 export class ProductController {
   constructor(private productService: ProductService) {}
@@ -65,6 +65,7 @@ export class ProductController {
   }
 
   @Post('update_stock')
+  @ApiTags('inventory')
   @HttpCode(HttpStatus.ACCEPTED)
   @ApiOkResponse({
     type: UpdateStockResponseDto,

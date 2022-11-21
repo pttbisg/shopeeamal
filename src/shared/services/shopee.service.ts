@@ -291,6 +291,7 @@ export class ShopeeService {
       case 'logistics.error_zipcode_not_found':
       case 'logistics.not_found':
       case 'logistics.order not found':
+      case 'logistics.package_number_not_found':
         throw new NotFoundException({
           shopee_error: error,
           message: 'Request parameter error. Resource not found',
@@ -406,6 +407,9 @@ export class ShopeeService {
       case 'error_item_uneditable':
       case 'cnsc_shop_block':
       case 'error_item_not_belong_shop':
+      case 'logistics.order_status_error':
+      case 'logistics.shipping_document_type_invalid':
+      case 'logistics.tracking_number_invalid':
         throw new BadRequestException({
           shopee_error: error,
           message: 'Request parameter error. See shopee_error for the details',
@@ -430,6 +434,8 @@ export class ShopeeService {
       case 'error_busi_update_stock_failed':
       case 'error_busi_cannot_edit_vsku':
       case 'error_wms_shop_block_upate_stock':
+      case 'common.batch_api_all_failed':
+      case 'logistics.package_can_not_print':
         throw new ServiceUnavailableException({
           shopee_error: error,
           message: 'Service error on internal Shopee side',

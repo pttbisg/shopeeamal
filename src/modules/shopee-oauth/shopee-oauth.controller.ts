@@ -35,7 +35,7 @@ import { UrlDto } from './dtos/url.dto';
 import { ShopeeOauthService } from './shopee-oauth.service';
 
 @Controller('shopee/auth')
-@ApiTags('shopee-oauth', 'shopee')
+@ApiTags('shopee-oauth')
 @Auth(false, [RoleType.USER, RoleType.ADMIN])
 @ApiDefaultResponse({
   type: StandardErrorDto,
