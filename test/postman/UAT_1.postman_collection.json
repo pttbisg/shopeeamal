@@ -1160,6 +1160,65 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Test Proxy",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/proxy/order/get_order_list?user_id=sandbox12345",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"proxy",
+						"order",
+						"get_order_list"
+					],
+					"query": [
+						{
+							"key": "user_id",
+							"value": "sandbox12345"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Test Create Shipping DOcument Copy",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"order_list\": [\n        {\n            \"order_sn\": \"{{orderSn}}\"\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/shopee/logistics/create_shipping_document?user_id=sandbox12345",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"shopee",
+						"logistics",
+						"create_shipping_document"
+					],
+					"query": [
+						{
+							"key": "user_id",
+							"value": "sandbox12345"
+						}
+					]
+				}
+			},
+			"response": []
 		}
 	],
 	"auth": {

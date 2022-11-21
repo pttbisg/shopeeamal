@@ -11,6 +11,7 @@ import { HealthCheckerModule } from './modules/health-checker/health-checker.mod
 import { LogisticsModule } from './modules/logistics/logistics.module';
 import { OrderModule } from './modules/order/order.module';
 import { ProductModule } from './modules/product/product.module';
+import { ProxyModule } from './modules/proxy/proxy.module';
 import { ShopeeOauthModule } from './modules/shopee-oauth/shopee-oauth.module';
 import { UserModule } from './modules/user/user.module';
 import { ApiConfigService } from './shared/services/api-config.service';
@@ -20,6 +21,7 @@ import { SharedModule } from './shared/shared.module';
   imports: [
     AuthModule,
     ShopeeOauthModule,
+    ProxyModule,
     OrderModule,
     ProductModule,
     LogisticsModule,
