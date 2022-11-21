@@ -80,11 +80,6 @@ export class AddOrders1669021215663 implements MigrationInterface {
             ADD "ship_by_date" integer
         `);
     await queryRunner.query(`
-            ALTER TABLE "shopee-oauths"
-            ALTER COLUMN "status"
-            SET DEFAULT 'CREATED'
-        `);
-    await queryRunner.query(`
             CREATE UNIQUE INDEX "IDX_e29950bb5d40c51c9fe7f5acf4" ON "orders" ("order_sn")
         `);
   }
@@ -92,11 +87,6 @@ export class AddOrders1669021215663 implements MigrationInterface {
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
             DROP INDEX "public"."IDX_e29950bb5d40c51c9fe7f5acf4"
-        `);
-    await queryRunner.query(`
-            ALTER TABLE "shopee-oauths"
-            ALTER COLUMN "status"
-            SET DEFAULT 'CREATED' - oauths_status_enum "
         `);
     await queryRunner.query(`
             ALTER TABLE "orders" DROP COLUMN "ship_by_date"

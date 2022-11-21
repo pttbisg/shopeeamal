@@ -7,7 +7,7 @@ import {
   NumberField,
   PositiveIntegerFieldOptional,
 } from '../../../decorators';
-import type { ItemResponse } from './item-response.dto';
+import { ItemResponse } from './item-response.dto';
 
 class ItemListResponse extends ObjectResponse {
   @NumberField({ int: true })
@@ -19,7 +19,7 @@ class ItemListResponse extends ObjectResponse {
   @PositiveIntegerFieldOptional()
   next_offset: number;
 
-  @ApiProperty()
+  @ApiProperty({ type: ItemResponse, isArray: true })
   item: ItemResponse[];
 }
 

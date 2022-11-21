@@ -7,7 +7,7 @@ import {
   StringFieldOptional,
   TimestampField,
 } from '../../../decorators';
-import { OrderStatus } from './order-response.dto';
+import { OrderStatus } from './order.dto';
 
 enum OrderTimeRange {
   create_time = 'create_time',

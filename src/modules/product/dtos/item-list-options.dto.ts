@@ -5,7 +5,7 @@ import {
   StringEnumArrayQueryExplodeField,
   TimestampFieldOptional,
 } from '../../../decorators';
-import { ItemStatus } from './item-response.dto';
+import { ItemStatus } from './item.dto';
 
 export class ItemListOptionsDto extends QueryOptionsDto {
   @NumberField({ int: true, example: 0 })

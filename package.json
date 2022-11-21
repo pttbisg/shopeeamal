@@ -17,7 +17,7 @@
     "migration:create": "cross-env typeorm migration:create src/database/migrations/$NAME",
     "new": "hygen new",
     "migration:run": "dotenv -- ts-node node_modules/typeorm/cli migration:run -d ormconfig.ts",
-    "migration:revert": "yarn run typeorm migration:revert",
+    "migration:revert": "dotenv -- ts-node node_modules/typeorm/cli migration:revert -d ormconfig.ts",
     "schema:drop": "yarn run typeorm schema:drop",
     "watch:dev": "ts-node-dev src/main.ts",
     "debug:dev": "cross-env TS_NODE_CACHE=false ts-node-dev --inspect --ignore '/^src/.*\\.spec\\.ts$/' src/main.ts",

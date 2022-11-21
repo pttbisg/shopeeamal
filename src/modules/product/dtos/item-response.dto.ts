@@ -11,31 +11,14 @@ import {
   StringFieldOptional,
   TimestampField,
 } from '../../../decorators';
-
-export enum ItemStatus {
-  NORMAL = 'NORMAL',
-  BANNED = 'BANNED',
-  DELETED = 'DELETED',
-  UNLIST = 'UNLIST',
-}
-
-export enum ItemCondition {
-  NEW = 'NEW',
-  USED = 'USED',
-}
-
-export enum ItemComplaintPolicy {
-  ONE_YEAR = 'ONE_YEAR',
-  TWO_YEARS = 'TWO_YEARS',
-  OVER_TWO_YEARS = 'OVER_TWO_YEARS',
-}
+import { ItemComplaintPolicy, ItemCondition, ItemStatus } from './item.dto';
 
 export class ItemResponse {
   @PositiveIntegerField()
   item_id: number;
 
   @EnumField(() => ItemStatus)
-  item_status: ItemStatus | string;
+  item_status: ItemStatus;
 
   @TimestampField()
   update_time: number;

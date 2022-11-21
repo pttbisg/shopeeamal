@@ -2,8 +2,7 @@ import { Column, Entity, Index } from 'typeorm';
 
 import { AbstractEntity } from '../../common/abstract.entity';
 import { UseDto } from '../../decorators';
-import { OrderDto } from './dtos/order.dto';
-import { OrderStatus } from './dtos/order-response.dto';
+import { OrderDto, OrderStatus } from './dtos/order.dto';
 
 @Entity({ name: 'orders' })
 @UseDto(OrderDto)
