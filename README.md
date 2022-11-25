@@ -2,7 +2,7 @@
 
 Service that handle the integration between Frontend/Backend and Shopee.
 
-This service is based on [Awesome NestJS Boilerplate v8](README_NEST.md). Typescript is the main programming language and [NestJS](https://github.com/nestjs/nest) is the framework. This service depends on [Shopee API](https://open.shopee.com/documents/v2/v2.product.get_category?module=89&type=1) to work. PostgreSQL is used as database. Redis is used for queueing/messaging purpose, implemented using (Bull)[https://github.com/OptimalBits/bull] that does integrate with Nest.
+This service is based on [Awesome NestJS Boilerplate v8](README_NEST.md). Typescript is the main programming language and [NestJS](https://github.com/nestjs/nest) is the framework. This service depends on [Shopee API](https://open.shopee.com/documents/v2/v2.product.get_category?module=89&type=1) to work. PostgreSQL is used as database. Redis is used for queueing/messaging purpose, implemented using [Bull](https://github.com/OptimalBits/bull) that does integrate with Nest.
 
 ## Setup
 
@@ -11,7 +11,7 @@ This service is based on [Awesome NestJS Boilerplate v8](README_NEST.md). Typesc
 3. Copy `.env.example` to `.env` and fill it with the correct Postgres and Redis configs.
 4. Run `yarn migration:run` to do DB migrations.
 5. Run `yarn start:dev` to build the app and run it locally.
-6. Go to [Shopee Console Management](https://open.shopee.com/myconsole/management/app), retrieve the `partner_id` and use this to register new user/account on the this service. See [Authentication](#authentication) section.
+6. Go to [Shopee Console Management](https://open.shopee.com/myconsole/management/app), retrieve the `partner_id`+`partner_key` and use this to register new user/account on the this service. See [Authentication](#authentication) section.
 
 
 ## Docs
@@ -48,9 +48,9 @@ Single account/API Key will correspond to single Partner/`partner_id` on the Sho
 #### Shopee OAuth
 
 The Shopee Oauth is handled by this service. The only flow that client needed are:
-1. Call `GET /shopee/auth/get_auth_url` and provide the `user_id` or optional `shop_id` to retrieve the URL that the user need to be visited/redirected.
-2. Let the end user login and authorize their Shopee account to our service. Note: For now, the client not get the notification whether it is successful or not.
-3. Call other API and provide the same `user_id`. Now you can access our user Shopee data. If you get `401` error, check the error message. If the problem is related to Shopee Oauth, do step 1 again and let the user reauthenticate. This may happens if user fails to do the OAuth or we never accessing the user acount more than 30 days. To prevent the later problem, for now, you can schedule any API call to this service for that user so it never expires.
+1. Call `GET /shopee/auth/get_auth_url` and provide the `user_id` or optional `shop_id` to retrieve the URL that the user need to be visited/redirected. Put the `callback_url` to retrieve the notification if the authentication is successful. See demo for example.
+2. Let the end user login and authorize their Shopee account to our service. 
+3. Call other API and provide the same `user_id`. Now you can access our user Shopee data. If you get `401` error, check the error message. If the problem is related to Shopee Oauth, do step 1 again and let the user reauthenticate. This may happens if user fails to do the OAuth or we never accessing the user account more than 30 days. To prevent the later problem, for now, you can schedule any API call to this service for that user so it never expires.
 
 ### Proxy
 
@@ -94,6 +94,11 @@ This is example to send a message and receive the ack.
             console.log(message);
   });
 ```
+
+
+### Demo
+Go to [{{url}}/demo.html](http://localhost:3000/demo.html) for simple demo of using the Authentication from client side. Fill the form and click Authorize.
+
 ## Quality Assurance
 
 ### Unit Test

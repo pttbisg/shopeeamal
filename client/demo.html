@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="" />
+    <meta name="author" content="Ichlasul Amal" />
+    <title>Demo</title>
+
+    <!-- Bootstrap core CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+
+    <style>
+      .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        user-select: none;
+      }
+
+      @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+      }
+    </style>
+
+    <!-- Custom styles for this template -->
+    <link href="./custom.css" rel="stylesheet" />
+  </head>
+  <body>
+    <main>
+      <h1 class="visually-hidden">Demo</h1>
+
+      <div class="px-4 py-5 my-5 text-center">
+        <h2 class="display-6">User Auth / Configs</h2>
+        <div class="col-lg-6 mx-auto">
+          <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+            <form id="configForm" class="p-2 p-md-3 border rounded-3 bg-light">
+                <div class="mb-3">
+                    <label for="apiKey" class="form-label">api_key</label>
+                    <input
+                      class="form-control"
+                      id="apiKey"
+                      aria-describedby="apiHelp"
+                    />
+                    <div id="apiHelp" class="form-text">
+                      API Key to access the API
+                    </div>
+                  </div>
+              <div class="mb-3">
+                <label for="userId" class="form-label">user_id</label>
+                <input
+                  class="form-control"
+                  id="userId"
+                  aria-describedby="userHelp"
+                />
+                <div id="userHelp" class="form-text">
+                  Internal user_id to identify the user
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="shopId" class="form-label">shop_id</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="shopId"
+                  aria-describedby="shopHelp"
+                />
+                <div id="shopHelp" class="form-text">
+                  Optional Shopee shop_id to make it easier to link the user.
+                  Not used for this demo.
+                </div>
+              </div>
+              <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                <button
+                  type="button m-5"
+                  id="save"
+                  class="btn btn-primary"
+                >
+                  Save
+                </button>
+                <button type="button" id="authorize" class="btn btn-outline-danger">
+                  Authorize
+                </button>
+              </div>
+            </form>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="b-example-divider"></div>
+
+      <div class="container my-5">
+        <div
+          class="row p-4 pb-0 pe-lg-0 pt-lg-5 align-items-center rounded-3 border shadow-lg"
+        >
+          <div class="col-lg-7 p-3 p-lg-5 pt-lg-3">
+            <h1 class="display-4 fw-bold lh-1">
+              Border hero with cropped image and shadows
+            </h1>
+            <p class="lead">
+              Quickly design and customize responsive mobile-first sites with
+              Bootstrap, the world’s most popular front-end open source toolkit,
+              featuring Sass variables and mixins, responsive grid system,
+              extensive prebuilt components, and powerful JavaScript plugins.
+            </p>
+            <div
+              class="d-grid gap-2 d-md-flex justify-content-md-start mb-4 mb-lg-3"
+            >
+              <button
+                type="button"
+                class="btn btn-primary btn-lg px-4 me-md-2 fw-bold"
+              >
+                Primary
+              </button>
+              <button
+                type="button"
+                class="btn btn-outline-secondary btn-lg px-4"
+              >
+                Default
+              </button>
+            </div>
+          </div>
+          <div class="col-lg-4 offset-lg-1 p-0 overflow-hidden shadow-lg">
+            <img
+              class="rounded-lg-3"
+              src="bootstrap-docs.png"
+              alt=""
+              width="720"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div id="notification" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="toast-header bg-primary text-white">
+            <strong id="notificationTitle" class="me-auto">Notification</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+          <div id="notificationMessage" class="toast-body"></div>
+        </div>
+      </div>
+
+      <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3">
+        <div id="error" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="toast-header bg-danger text-white" >
+            <strong id="notificationTitle" class="me-auto">Error</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+          <div id="errorMessage" class="toast-body"></div>
+        </div>
+      </div>
+
+      <div class="modal fade" id="authorizationModal" tabindex="-1" aria-labelledby="authorizationModalHelp" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+              <h1 class="modal-title fs-5" id="authorizationModalHelp">Authorization</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              Authorization successful. You can now access the rest of the API as this user.
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js"
+      integrity="sha512-aVKKRRi/Q/YV+4mjoKBsE4x3H+BkegoM/em46NNlCqNTmUYADjBbeNefNxYV7giUp0VxICtqdrbqU7iVaeZNXA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+      crossorigin="anonymous"
+    ></script>
+    <script src="./logic.js"></script>
+  </body>
+</html>
