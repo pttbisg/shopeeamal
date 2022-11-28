@@ -7,10 +7,10 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import type { QueryOptionsDto } from 'common/dto/query-options.dto';
 import { IsNull, Not, Repository } from 'typeorm';
 import { Transactional } from 'typeorm-transactional-cls-hooked';
 
+import { QueryOptionsDto } from '../../common/dto/query-options.dto';
 import { ShopeeOauthStatus } from '../../constants';
 import {
   ShopeeOauthForbiddenException,
@@ -19,10 +19,8 @@ import {
 import { UserEntity } from '../../modules/user/user.entity';
 import { ApiConfigService } from '../../shared/services/api-config.service';
 import { ShopeeService } from '../../shared/services/shopee.service';
-import type {
-  GetAccessTokenByResendCodePayloadDto,
-  GetAccessTokenPayloadDto,
-} from './dtos/get-access-token-payload.dto';
+import type { GetAccessTokenByResendCodePayloadDto } from './dtos/get-access-token-payload.dto';
+import { GetAccessTokenPayloadDto } from './dtos/get-access-token-payload.dto';
 import { OauthUrlOptionsDto } from './dtos/oauth-url-options.dto';
 import { ShopeeOauthDto } from './dtos/shopee-oauth.dto';
 import { ShopeeOauthNotFoundException } from './exceptions/shopee-oauth-not-found.exception';
@@ -117,6 +115,7 @@ export class ShopeeOauthService {
     });
   }
 
+  @Transactional()
   async getAccessToken(
     user: UserEntity,
     query: QueryOptionsDto,
@@ -181,6 +180,7 @@ export class ShopeeOauthService {
     });
   }
 
+  @Transactional()
   async refreshAccessToken(user: UserEntity, query: QueryOptionsDto) {
     this.shopeeService.user = user;
 
@@ -201,6 +201,7 @@ export class ShopeeOauthService {
     return response;
   }
 
+  @Transactional()
   async refreshToken(oauth: ShopeeOauthEntity) {
     const payload = {
       refresh_token: oauth.refreshToken,
@@ -240,6 +241,9 @@ export class ShopeeOauthService {
     return oauth;
   }
 
+  // TODO: Evaluate whether this is necessary to be wrapped in transaction that will reduce the throughput
+  // ot it's okay if we do this outside the transaction
+  @Transactional()
   async canActivate(request: IShopeeOauthRequest) {
     const user: UserEntity = request.user;
     const partnerId = user.partnerId;

@@ -110,7 +110,15 @@ Not available.
 1. Copy `UAT_1.postman_environment.json.example` to `UAT_1.postman_environment.json` and fill the details. Alternatively, open it with Postman to make it easier.
 2. Run `yarn run test:api`. Or use Postman app to edit the test or run it in visual environment.
 
+### Load Test
 
+1. Install [locust](https://locust.io/)
+2. Go to `test/load/` folder and run `env SHOPEE_SERVICE_API_KEY={api_key} python3 -m locust -H {api_url} -u 100 -r 1 -t 120s --autostart`
+3. Visit `localhost:8089` for the charts and result
+
+This is the sample of latest load test. The Get Order API can handle ~40 RPS without problem. The dip in the middle is because the Access Token is expired and the API automatically refresh it, causing the request to wait it first.
+
+![Load test](/docs/load.png "Load test").
 
 ## Deployment
 

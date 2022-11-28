@@ -1,5 +1,6 @@
 shopee-api-fastapi
 *.postman_environment.json
+__pycache__
 
 # Created by .ignore support plugin (hsz.mobi)
 ### Node template

@@ -203,7 +203,6 @@ export class ShopeeService {
     }
 
     const data = await response.json();
-
     this.logger.debug({
       request: {
         url,

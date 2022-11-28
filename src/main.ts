@@ -45,10 +45,12 @@ export async function bootstrap(): Promise<NestExpressApplication> {
   app.enable('trust proxy'); // only if you're behind a reverse proxy (Heroku, Bluemix, AWS ELB, Nginx, etc)
 
   // app.setGlobalPrefix('/api'); use api as global prefix if you don't have subdomain
+
+  // Very high limit, the client should be internal user
   app.use(
     rateLimit({
       windowMs: 1 * 60 * 1000, // 1 minute
-      max: 100, // limit each IP to 100 requests per windowMs
+      max: 10_000, // limit each IP to 10000 requests per windowMs
     }),
   );
   app.use(compression());
