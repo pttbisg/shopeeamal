@@ -80,6 +80,7 @@ export class ApiConfigService {
       redis: {
         host: this.getString('REDIS_HOST', 'localhost'),
         port: this.getNumber('REDIS_PORT', 6379),
+        password: this.getString('REDIS_PASSWORD', ''),
       },
     };
   }
