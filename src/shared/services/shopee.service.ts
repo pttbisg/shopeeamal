@@ -198,7 +198,7 @@ export class ShopeeService {
       response = await fetch(url, fetchOptions);
     } catch {
       throw new InternalServerErrorException({
-        message: 'Error when accessing Backend API',
+        message: 'Error when accessing Shopee API',
       });
     }
 

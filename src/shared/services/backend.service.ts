@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import {
-  BadRequestException,
   Injectable,
   InternalServerErrorException,
   Logger,
@@ -53,7 +52,7 @@ export class BackendApiService {
       response = await fetch(fullUrl, fetchOptions);
     } catch {
       throw new InternalServerErrorException({
-        message: 'Error when accessing Shopee API',
+        message: 'Error when accessing Backend API',
       });
     }
 
@@ -69,8 +68,8 @@ export class BackendApiService {
     });
 
     if (!response.ok || data.error) {
-      throw new BadRequestException({
-        message: data.error,
+      throw new InternalServerErrorException({
+        message: 'Error when accessing Backend API',
       });
     }
 

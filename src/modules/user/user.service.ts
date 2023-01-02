@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto';
+
 import { Injectable } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -39,37 +41,33 @@ export class UserService {
   async createUser(userRegisterDto: UserRegisterDto): Promise<UserEntity> {
     let user;
 
-    try {
-      if (userRegisterDto.backendJWT) {
-        // call check User to BE
-        const backendUserInfo = await this.backendApiService.verifyJWT(
-          userRegisterDto.backendJWT,
-        );
+    if (userRegisterDto.backendJWT) {
+      // call check User to BE
+      const backendUserInfo = await this.backendApiService.verifyJWT(
+        userRegisterDto.backendJWT,
+      );
 
-        if (backendUserInfo?.id) {
-          const apiKey = backendUserInfo?.id as string;
-          const apiKeyHash = await bcrypt.hash(apiKey, 10);
-          user = this.userRepository.create({
-            id: backendUserInfo?.id as string,
-            apiKey: apiKeyHash,
-            ...userRegisterDto,
-          });
-        }
-      } else {
-        const apiKey = generateApiKey().toString();
-        const apiKeyHash = await bcrypt.hash(apiKey, 10);
+      if (backendUserInfo?.id) {
+        const apiKey = backendUserInfo?.id as string;
+        const apiKeyHash = createHash('md5').update(apiKey).digest('hex');
         user = this.userRepository.create({
+          id: backendUserInfo?.id as string,
           apiKey: apiKeyHash,
           ...userRegisterDto,
         });
       }
-
-      await this.userRepository.save(user);
-
-      return user;
-    } catch {
-      throw new UserNotFoundException();
+    } else {
+      const apiKey = generateApiKey().toString();
+      const apiKeyHash = await bcrypt.hash(apiKey, 10);
+      user = this.userRepository.create({
+        apiKey: apiKeyHash,
+        ...userRegisterDto,
+      });
     }
+
+    await this.userRepository.save(user);
+
+    return user;
   }
 
   async getUsers(
