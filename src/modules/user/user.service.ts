@@ -11,6 +11,7 @@ import type { PageDto } from '../../common/dto/page.dto';
 import { UserNotFoundException } from '../../exceptions';
 import { UserRegisterDto } from '../../modules/auth/dto/UserRegisterDto';
 import { AwsS3Service } from '../../shared/services/aws-s3.service';
+import { BackendApiService } from '../../shared/services/backend.service';
 import { ValidatorService } from '../../shared/services/validator.service';
 import type { UserDto } from './dtos/user.dto';
 import type { UsersPageOptionsDto } from './dtos/users-page-options.dto';
@@ -24,6 +25,7 @@ export class UserService {
     private validatorService: ValidatorService,
     private awsS3Service: AwsS3Service,
     private commandBus: CommandBus,
+    private backendApiService: BackendApiService,
   ) {}
 
   /**
@@ -35,13 +37,31 @@ export class UserService {
 
   @Transactional()
   async createUser(userRegisterDto: UserRegisterDto): Promise<UserEntity> {
-    const apiKey = generateApiKey().toString();
+    let user;
 
-    const apiKeyHash = await bcrypt.hash(apiKey, 10);
-    const user = this.userRepository.create({
-      apiKey: apiKeyHash,
-      ...userRegisterDto,
-    });
+    if (userRegisterDto.backendJWT) {
+      // TODO call check User to BE
+      const backendUserInfo = await this.backendApiService.verifyJWT(
+        userRegisterDto.backendJWT,
+      );
+
+      if (backendUserInfo?.id) {
+        const apiKey = backendUserInfo?.id as string;
+        const apiKeyHash = await bcrypt.hash(apiKey, 10);
+        user = this.userRepository.create({
+          id: backendUserInfo?.id as string,
+          apiKey: apiKeyHash,
+          ...userRegisterDto,
+        });
+      }
+    } else {
+      const apiKey = generateApiKey().toString();
+      const apiKeyHash = await bcrypt.hash(apiKey, 10);
+      user = this.userRepository.create({
+        apiKey: apiKeyHash,
+        ...userRegisterDto,
+      });
+    }
 
     await this.userRepository.save(user);
 

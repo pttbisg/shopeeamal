@@ -7,6 +7,9 @@ import {
 } from '../../../decorators';
 
 export class UserRegisterDto {
+  @StringFieldOptional()
+  backendJWT: string;
+
   @StringField()
   readonly clientName: string;
 
