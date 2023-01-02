@@ -39,33 +39,37 @@ export class UserService {
   async createUser(userRegisterDto: UserRegisterDto): Promise<UserEntity> {
     let user;
 
-    if (userRegisterDto.backendJWT) {
-      // TODO call check User to BE
-      const backendUserInfo = await this.backendApiService.verifyJWT(
-        userRegisterDto.backendJWT,
-      );
+    try {
+      if (userRegisterDto.backendJWT) {
+        // call check User to BE
+        const backendUserInfo = await this.backendApiService.verifyJWT(
+          userRegisterDto.backendJWT,
+        );
 
-      if (backendUserInfo?.id) {
-        const apiKey = backendUserInfo?.id as string;
+        if (backendUserInfo?.id) {
+          const apiKey = backendUserInfo?.id as string;
+          const apiKeyHash = await bcrypt.hash(apiKey, 10);
+          user = this.userRepository.create({
+            id: backendUserInfo?.id as string,
+            apiKey: apiKeyHash,
+            ...userRegisterDto,
+          });
+        }
+      } else {
+        const apiKey = generateApiKey().toString();
         const apiKeyHash = await bcrypt.hash(apiKey, 10);
         user = this.userRepository.create({
-          id: backendUserInfo?.id as string,
           apiKey: apiKeyHash,
           ...userRegisterDto,
         });
       }
-    } else {
-      const apiKey = generateApiKey().toString();
-      const apiKeyHash = await bcrypt.hash(apiKey, 10);
-      user = this.userRepository.create({
-        apiKey: apiKeyHash,
-        ...userRegisterDto,
-      });
+
+      await this.userRepository.save(user);
+
+      return user;
+    } catch {
+      throw new UserNotFoundException();
     }
-
-    await this.userRepository.save(user);
-
-    return user;
   }
 
   async getUsers(
