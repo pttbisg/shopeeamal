@@ -185,6 +185,12 @@ export class ApiConfigService {
     };
   }
 
+  get backendUrl() {
+    return {
+      url: this.getString('BACKEND_URL'),
+    };
+  }
+
   private get(key: string, defaultValue?: string): string {
     const value = this.configService.get<string>(key);
 

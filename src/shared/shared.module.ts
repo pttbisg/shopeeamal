@@ -5,6 +5,7 @@ import { CqrsModule } from '@nestjs/cqrs';
 // import { ClientProxyFactory, Transport } from '@nestjs/microservices';
 import { ApiConfigService } from './services/api-config.service';
 import { AwsS3Service } from './services/aws-s3.service';
+import { BackendApiService } from './services/backend.service';
 import { GeneratorService } from './services/generator.service';
 import { ShopeeService } from './services/shopee.service';
 import { TranslationService } from './services/translation.service';
@@ -17,6 +18,7 @@ const providers = [
   AwsS3Service,
   GeneratorService,
   TranslationService,
+  BackendApiService,
   // {
   //   provide: 'NATS_SERVICE',
   //   useFactory: (configService: ApiConfigService) => {
